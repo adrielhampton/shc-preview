@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Housing California — Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --indigo:   #1E3A6E;
+  --indigo-d: #152B54;
+  --indigo-x: #0d1e3a;
+  --marigold: #F2A30F;
+  --pearl:    #F2F4F8;
+  --brick:    #D94F38;
+  --sky:      #4A78C4;
+  --white:    #FFFFFF;
+  --body-txt: #1C2540;
+  --meta-txt: #5A6580;
+  --font: 'Sora', system-ui, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  background: var(--indigo-x);
+  overflow: hidden;
+}
+
+/* ── PAGE STACK ───────────────────────────────────── */
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* ── HEADER ───────────────────────────────────────── */
+.site-header {
+  background: var(--indigo);
+  border-bottom: 3px solid var(--marigold);
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 200;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+}
+.header-wordmark .l1 {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--white);
+  letter-spacing: -0.01em;
+  display: block;
+  line-height: 1.2;
+}
+.header-wordmark .l2 {
+  font-size: 0.7rem;
+  color: var(--marigold);
+  font-weight: 400;
+  display: block;
+}
+
+.header-back {
+  color: rgba(255,255,255,0.55);
+  font-size: 0.78rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+.header-back:hover { color: var(--marigold); }
+
+/* ── FILTER STRIP ─────────────────────────────────── */
+.filter-strip {
+  background: var(--indigo-d);
+  padding: 0.55rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  z-index: 200;
+}
+.filter-strip::-webkit-scrollbar { display: none; }
+
+.filter-label {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-right: 0.2rem;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 100px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  font-family: var(--font);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.45);
+}
+.filter-pill .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: transform 0.18s;
+}
+.filter-pill.active { color: var(--white); background: rgba(255,255,255,0.1); }
+.filter-pill.active .dot { transform: scale(1.3); }
+.filter-pill[data-type="clt"].active    { border-color: rgba(255,255,255,0.7); color: #ffffff; }
+.filter-pill[data-type="public"].active { border-color: #7aaef0; color: #7aaef0; }
+.filter-pill[data-type="coop"].active   { border-color: #f07a6a; color: #f07a6a; }
+.filter-pill[data-type="all"].active    { border-color: rgba(255,255,255,0.4); color: var(--white); }
+
+/* ── MAP AREA ─────────────────────────────────────── */
+.map-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#caMap {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: default;
+  touch-action: none; /* prevent pinch-zoom on the map element */
+}
+
+.map-marker-dot {
+  cursor: pointer;
+  transition: r 0.15s ease;
+}
+.map-marker-dot:hover { r: 9px; }
+
+/* ── COUNT BADGE ──────────────────────────────────── */
+.map-count {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(21,43,84,0.92);
+  color: var(--white);
+  border: 1.5px solid var(--marigold);
+  border-radius: 100px;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  z-index: 150;
+  pointer-events: none;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(4px);
+}
+
+/* ── DRAWER ───────────────────────────────────────── */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 300;
+  pointer-events: none;
+  transition: background 0.25s;
+}
+.drawer-overlay.visible {
+  background: rgba(10,18,40,0.5);
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--white);
+  border-radius: 16px 16px 0 0;
+  padding: 0 1.25rem 2rem;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 400;
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.drawer.open { transform: translateY(0); }
+
+.drawer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0 0.4rem;
+  margin-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+
+.drawer-handle {
+  width: 36px; height: 4px;
+  background: #D0D5E8;
+  border-radius: 2px;
+  /* center it between the invisible left spacer and close button */
+  flex: 1;
+  margin: 0 auto;
+  max-width: 36px;
+}
+
+/* Invisible spacer mirrors close button width so handle stays centered */
+.drawer-top::before {
+  content: '';
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.drawer-close {
+  background: var(--pearl);
+  border: none;
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--meta-txt);
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.drawer-close:hover {
+  background: #E0E4F0;
+  color: var(--indigo);
+}
+.drawer-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.62rem;
+  border-radius: 100px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.drawer-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--indigo);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.28rem;
+}
+.drawer-location {
+  font-size: 0.8rem;
+  color: var(--meta-txt);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.drawer-divider { height: 1px; background: #E8EBF4; margin: 0.8rem 0; }
+.drawer-desc { font-size: 0.88rem; line-height: 1.65; color: #3A4560; }
+.drawer-meta { margin-top: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.drawer-tag {
+  background: var(--pearl);
+  color: var(--meta-txt);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.22rem 0.55rem;
+  border-radius: 4px;
+}
+.drawer-link {
+  display: block;
+  margin-top: 1rem;
+  background: var(--indigo);
+  color: var(--white);
+  text-decoration: none;
+  text-align: center;
+  padding: 0.82rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  transition: background 0.15s;
+}
+.drawer-link:hover { background: var(--indigo-d); }
+
+/* ── EMPTY STATE ──────────────────────────────────── */
+.map-empty {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  background: rgba(21,43,84,0.92);
+  color: rgba(255,255,255,0.7);
+  padding: 0.9rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  text-align: center;
+  display: none;
+  z-index: 160;
+  border: 1px solid rgba(255,255,255,0.12);
+  pointer-events: none;
+}
+.map-empty.visible { display: block; }
+
+/* ── FULL-SCREEN IMAGE MODAL ──────────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: var(--white);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+}
+.modal.open {
+  transform: translateY(0);
+}
+
+.modal-img-wrap {
+  position: relative;
+  width: 100%;
+  /* Image fills ~55% of screen height */
+  height: 55vh;
+  flex-shrink: 0;
+  background: var(--indigo-d);
+  overflow: hidden;
+}
+
+.modal-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-family: var(--font);
+}
+.modal-img-placeholder .ph-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.15);
+}
+.modal-img-placeholder .ph-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+.modal-img-placeholder .ph-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  max-width: 72%;
+  line-height: 1.3;
+}
+
+/* Gradient from image into white content below */
+.modal-img-gradient {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255,255,255,0.15) 40%,
+    rgba(255,255,255,0.85) 80%,
+    var(--white) 100%
+  );
+  pointer-events: none;
+}
+
+/* Close button — top-right, always visible against image */
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(15, 30, 60, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  z-index: 10;
+}
+.modal-close:hover { background: rgba(15, 30, 60, 0.8); }
+
+/* Scrollable content area below image */
+.modal-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 1.25rem 2.5rem;
+  /* Pull content up to overlap gradient */
+  margin-top: -1.5rem;
+  position: relative;
+}
+
+/* ── DESKTOP: modal becomes a centered card ───────── */
+@media (min-width: 700px) {
+  .modal {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% + 30px));
+    opacity: 0;
+    width: min(520px, 90vw);
+    max-height: 85vh;
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    transition: transform 0.28s cubic-bezier(0.32,0.72,0,1), opacity 0.28s ease;
+  }
+  .modal.open {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+  .modal-img-wrap { height: 260px; border-radius: 14px 14px 0 0; }
+}
+
+/* ── DESKTOP DRAWER ───────────────────────────────── */
+@media (min-width: 700px) {
+  .drawer {
+    position: fixed;
+    max-width: 400px;
+    left: auto;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    border-radius: 12px;
+    max-height: 72vh;
+    transform: translateY(12px);
+    opacity: 0;
+    transition: transform 0.26s cubic-bezier(0.32,0.72,0,1), opacity 0.26s ease;
+  }
+  .drawer.open { transform: translateY(0); opacity: 1; }
+  .drawer-handle { display: none; }
+  .drawer-overlay.visible { background: transparent; pointer-events: none; }
+  .drawer-top { justify-content: flex-end; padding-top: 0.6rem; }
+  .drawer-top::before { display: none; }
+}
+@media (min-width: 700px) {
+  .drawer {
+    position: fixed;
+    max-width: 400px;
+    left: auto;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    border-radius: 12px;
+    max-height: 72vh;
+    transform: translateY(12px);
+    opacity: 0;
+    transition: transform 0.26s cubic-bezier(0.32,0.72,0,1), opacity 0.26s ease;
+  }
+  .drawer.open { transform: translateY(0); opacity: 1; }
+  .drawer-handle { display: none; }
+  .drawer-top::before { display: none; }
+  .drawer-overlay.visible { background: transparent; pointer-events: none; }
+  .drawer-top { justify-content: flex-end; padding-top: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-stack">
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="#" class="header-logo" aria-label="Social Housing California">
+      <svg width="34" height="29" viewBox="0 0 52 44" fill="none" aria-hidden="true">
+        <path d="M2 20L10 12L18 20V36H2V20Z" fill="#4A78C4" opacity=".75"/>
+        <rect x="7" y="26" width="6" height="10" fill="#1E3A6E"/>
+        <path d="M14 18L26 8L38 18V38H14V18Z" fill="#fff" stroke="#F2A30F" stroke-width="1.4" stroke-linejoin="round"/>
+        <rect x="21" y="27" width="10" height="11" fill="#1E3A6E"/>
+        <rect x="34" y="15" width="16" height="23" fill="#F2A30F" opacity=".9"/>
+        <rect x="36" y="18" width="3" height="3" fill="#1E3A6E" opacity=".5"/>
+        <rect x="41" y="18" width="3" height="3" fill="#1E3A6E" opacity=".5"/>
+        <rect x="36" y="23" width="3" height="3" fill="#1E3A6E" opacity=".5"/>
+        <rect x="41" y="23" width="3" height="3" fill="#1E3A6E" opacity=".5"/>
+        <rect x="38" y="29" width="7" height="9" fill="#1E3A6E" opacity=".4"/>
+      </svg>
+      <div class="header-wordmark">
+        <span class="l1">Social Housing California</span>
+        <span class="l2">Where It's Happening</span>
+      </div>
+    </a>
+    <a href="#" class="header-back" aria-label="Back to main site">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Home
+    </a>
+  </header>
+
+  <!-- Filter strip -->
+  <div class="filter-strip" role="group" aria-label="Filter by housing type">
+    <span class="filter-label">Show:</span>
+    <button class="filter-pill active" data-type="all">
+      <span class="dot" style="background:rgba(255,255,255,0.5)"></span>All
+    </button>
+    <button class="filter-pill active" data-type="clt">
+      <span class="dot" style="background:#FFFFFF"></span>Community Land Trusts
+    </button>
+    <button class="filter-pill active" data-type="public">
+      <span class="dot" style="background:#7aaef0"></span>Public &amp; Social Purpose
+    </button>
+    <button class="filter-pill active" data-type="coop">
+      <span class="dot" style="background:#f07a6a"></span>Limited-Equity Co-ops
+    </button>
+  </div>
+
+  <!-- Map -->
+  <div class="map-wrap">
+
+    <!-- Custom SVG map — zero tile dependencies -->
+    <svg id="caMap"
+         viewBox="-30 -20 480 580"
+         preserveAspectRatio="xMidYMid meet"
+         role="application"
+         aria-label="Interactive map of social housing in California">
+
+      <defs>
+        <!-- Ocean diagonal line pattern -->
+        <pattern id="oceanLines" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+          <line x1="0" y1="0" x2="0" y2="24" stroke="rgba(74,120,196,0.07)" stroke-width="1"/>
+        </pattern>
+
+        <!-- State inner glow -->
+        <filter id="stateGlow" x="-5%" y="-5%" width="110%" height="110%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
+
+        <!-- Marker glow filter -->
+        <filter id="markerGlow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
+
+        <!-- State gradient fill — Marigold, the Golden State -->
+        <linearGradient id="stateGrad" x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0%"   stop-color="#F5B830"/>
+          <stop offset="100%" stop-color="#D9900C"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Ocean background -->
+      <rect x="-30" y="-20" width="480" height="580" fill="#0d1c38"/>
+      <!-- Pattern overlay -->
+      <rect x="-30" y="-20" width="480" height="580" fill="url(#oceanLines)"/>
+
+      <!-- Subtle vignette -->
+      <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+        <stop offset="0%"   stop-color="transparent"/>
+        <stop offset="100%" stop-color="rgba(5,10,25,0.55)"/>
+      </radialGradient>
+      <rect x="-30" y="-20" width="480" height="580" fill="url(#vignette)"/>
+
+      <!-- ── CALIFORNIA STATE SHAPE ──────────────────────
+           Coordinate system:
+           x = (lng + 124.5) * (420/11)   [px per degree lng]
+           y = (42.1 - lat) * (540/9.9)   [px per degree lat]
+
+           Key points (lng, lat) → (x, y):
+           NW coast   (-124.2, 42.0) →  12,   6
+           Cape Mendo (-124.4, 40.4) →   4,  93
+           Golden Gate(-122.5, 37.8) →  76, 235
+           Pt Conc    (-120.5, 34.5) → 153, 415
+           LA         (-118.5, 34.0) → 229, 442
+           SW corner  (-117.1, 32.5) → 283, 524
+           SE corner  (-114.7, 32.5) → 374, 524
+           NE corner  (-120.0, 42.0) → 172,   6
+      ─────────────────────────────────────────────── -->
+
+      <!-- State body shadow/glow behind shape -->
+      <path d="
+        M 12,6
+        L 4,55 L 4,93 L 15,126 L 27,169 L 48,199 L 57,207
+        L 61,224 L 72,232 L 80,240 L 85,252 L 76,268 L 76,273
+        L 96,284 L 99,300 L 108,322 L 118,338 L 132,358 L 138,366
+        L 147,395 L 153,415
+        L 165,424 L 183,433 L 210,440 L 229,442
+        L 241,452 L 252,464 L 260,475 L 270,495 L 279,513 L 283,524
+        L 374,524
+        L 378,513 L 378,393 L 359,360
+        L 286,306 L 233,235 L 172,169 L 172,6
+        Z"
+        fill="#F2A30F"
+        opacity="0.3"
+        filter="url(#stateGlow)"
+        transform="translate(3,4)"/>
+
+      <!-- State body -->
+      <path id="caShape" d="
+        M 12,6
+        L 4,55 L 4,93 L 15,126 L 27,169 L 48,199 L 57,207
+        L 61,224 L 72,232 L 80,240 L 85,252 L 76,268 L 76,273
+        L 96,284 L 99,300 L 108,322 L 118,338 L 132,358 L 138,366
+        L 147,395 L 153,415
+        L 165,424 L 183,433 L 210,440 L 229,442
+        L 241,452 L 252,464 L 260,475 L 270,495 L 279,513 L 283,524
+        L 374,524
+        L 378,513 L 378,393 L 359,360
+        L 286,306 L 233,235 L 172,169 L 172,6
+        Z"
+        fill="url(#stateGrad)"
+        stroke="#B87A0A"
+        stroke-width="1.5"
+        stroke-linejoin="round"/>
+
+      <!-- Sierra Nevada ridge hint -->
+      <path d="M 172,100 L 175,140 L 178,169 L 185,200 L 193,220 L 200,245"
+        stroke="rgba(180,110,0,0.25)" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+      <!-- Central Valley — lighter warm tone -->
+      <ellipse cx="165" cy="290" rx="40" ry="90"
+        fill="rgba(255,200,50,0.08)" transform="rotate(-10,165,290)"/>
+
+      <!-- Coast glow — warm amber where land meets ocean -->
+      <path d="
+        M 12,6 L 4,55 L 4,93 L 15,126 L 27,169 L 48,199 L 57,207
+        L 61,224 L 72,232 L 80,240 L 85,252 L 76,268 L 76,273
+        L 96,284 L 99,300 L 108,322 L 118,338 L 132,358 L 138,366
+        L 147,395 L 153,415 L 165,424 L 183,433 L 210,440 L 229,442
+        L 241,452 L 252,464 L 260,475 L 270,495 L 279,513 L 283,524"
+        fill="none"
+        stroke="rgba(255,210,80,0.45)"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+      <!-- ── CITY LABELS — Indigo for legibility on Marigold ── -->
+      <g font-family="'Sora', system-ui" fill="rgba(15,35,80,0.6)" font-size="8.5" font-weight="700" letter-spacing="0.07em">
+        <circle cx="80" cy="235" r="2.5" fill="rgba(15,35,80,0.4)"/>
+        <text x="86" y="239" text-anchor="start">SF</text>
+
+        <circle cx="115" cy="191" r="2.5" fill="rgba(15,35,80,0.4)"/>
+        <text x="121" y="195" text-anchor="start">SAC</text>
+
+        <circle cx="235" cy="440" r="2.5" fill="rgba(15,35,80,0.4)"/>
+        <text x="213" y="453" text-anchor="start">LOS ANGELES</text>
+
+        <circle cx="279" cy="510" r="2.5" fill="rgba(15,35,80,0.4)"/>
+        <text x="258" y="523" text-anchor="start">SAN DIEGO</text>
+
+        <circle cx="165" cy="295" r="2" fill="rgba(15,35,80,0.3)"/>
+        <text x="150" y="308" text-anchor="start" font-size="7.5" opacity="0.8">FRESNO</text>
+      </g>
+
+      <!-- ── MARKER LAYERS ── -->
+      <!-- Pulse rings (behind dots) -->
+      <g id="ringsLayer"></g>
+      <!-- Marker dots (above rings) -->
+      <g id="dotsLayer"></g>
+
+    </svg>
+
+    <!-- Count badge -->
+    <div class="map-count" id="mapCount" aria-live="polite">20 locations</div>
+    <div class="map-empty" id="mapEmpty" role="status">No locations match this filter</div>
+
+  </div><!-- /.map-wrap -->
+
+  <!-- Drawer overlay — outside map-wrap so pinch-zoom doesn't scale it -->
+  <div class="drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+
+  <!-- Drawer — outside map-wrap, renders at viewport scale always -->
+  <div class="drawer" id="drawer" role="dialog" aria-modal="false" aria-label="Location detail">
+    <div class="drawer-top">
+      <div class="drawer-handle" aria-hidden="true"></div>
+      <button class="drawer-close" id="drawerClose" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="drawerContent"></div>
+  </div>
+
+  <!-- Full-screen modal — for locations with images -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Location detail" aria-hidden="true">
+    <div class="modal-img-wrap" id="modalImgWrap">
+      <div id="modalImgPlaceholder" class="modal-img-placeholder" aria-hidden="true"></div>
+      <div class="modal-img-gradient"></div>
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
+</div><!-- /.page-stack -->
+
+<script>
+// ── LOCATION DATA ─────────────────────────────────────────────────────────
+const LOCATIONS = [
+  { id:1, type:'clt', name:'San Francisco Community Land Trust', city:'San Francisco', region:'Bay Area',
+    lat:37.770, lng:-122.408,
+    desc:'Acquires and permanently stewards affordable housing in SF, converting tenant-occupied buildings into community-owned assets that remain affordable in perpetuity.',
+    tags:['CLT','Tenant-Led','Multi-family'], url:'https://sfclt.org', units:'40+ units',
+    img:'https://picsum.photos/seed/sfclt/800/500' },
+  { id:2, type:'coop', name:'East Bay Permanent Real Estate Cooperative', city:'Oakland', region:'Bay Area',
+    lat:37.812, lng:-122.265,
+    desc:'Community-owned real estate cooperative focused on permanently affordable housing and community wealth-building in East Bay neighborhoods.',
+    tags:['Co-op','BIPOC-led','Community Wealth'], url:'https://ebprec.org', units:'30+ units',
+    img:'https://picsum.photos/seed/ebprec/800/500' },
+  { id:3, type:'clt', name:'Oakland Community Land Trust', city:'Oakland', region:'Bay Area',
+    lat:37.796, lng:-122.240,
+    desc:'Acquires land and buildings in Oakland to preserve affordability and prevent displacement of long-term residents in gentrifying neighborhoods.',
+    tags:['CLT','Anti-displacement','Multi-family'], url:'https://oaklandclt.org', units:'100+ units' },
+  { id:4, type:'public', name:'BRIDGE Housing — Tassafaronga Village', city:'Oakland', region:'Bay Area',
+    lat:37.758, lng:-122.198,
+    desc:'Award-winning mixed-income community developed on former public housing land — 157 affordable rental units with extensive community services.',
+    tags:['Social Purpose','Mixed-income','Rental'], url:'https://bridgehousing.com', units:'157 units',
+    img:'https://picsum.photos/seed/bridge/800/500' },
+  { id:5, type:'clt', name:'Champaign County CLT (CA Chapter)', city:'Berkeley', region:'Bay Area',
+    lat:37.880, lng:-122.278,
+    desc:'A community-controlled land trust working to permanently remove housing from the speculative market in Berkeley and surrounding communities.',
+    tags:['CLT','Homeownership','Permanent'], url:'#', units:'25+ units' },
+  { id:6, type:'public', name:'Tenderloin Neighborhood Development Corp', city:'San Francisco', region:'Bay Area',
+    lat:37.784, lng:-122.413,
+    desc:'Nonprofit developer providing permanently affordable housing and services in the Tenderloin, one of SF\'s most underserved neighborhoods.',
+    tags:['Social Purpose','SRO','Supportive'], url:'https://tndc.org', units:'2,500+ units',
+    img:'https://picsum.photos/seed/tndc/800/500' },
+  { id:7, type:'clt', name:'Dos Rios Community Land Trust', city:'Sacramento', region:'Central Valley',
+    lat:38.590, lng:-121.490,
+    desc:'Developing permanently affordable homeownership in Sacramento\'s underserved neighborhoods through a community land trust model.',
+    tags:['CLT','Homeownership','Latinx-serving'], url:'#', units:'Developing' },
+  { id:8, type:'public', name:'Resources for Community Development', city:'Berkeley', region:'Bay Area',
+    lat:37.856, lng:-122.282,
+    desc:'Nonprofit affordable housing developer creating diverse, high-quality permanently affordable rental housing across the East Bay.',
+    tags:['Social Purpose','Rental','Supportive'], url:'https://rcdhousing.org', units:'1,000+ units',
+    img:'https://picsum.photos/seed/rcd/800/500' },
+  { id:9, type:'coop', name:'Co-op Center FCU Housing', city:'Berkeley', region:'Bay Area',
+    lat:37.864, lng:-122.256,
+    desc:'Credit union-backed limited-equity cooperative housing preserving affordable units for working families in the East Bay.',
+    tags:['Co-op','Limited-equity','Credit Union'], url:'#', units:'45 units' },
+  { id:10, type:'public', name:'Eden Housing', city:'Hayward', region:'Bay Area',
+    lat:37.669, lng:-122.086,
+    desc:'One of California\'s largest affordable housing nonprofits, developing and managing permanently affordable rental communities across the Bay Area.',
+    tags:['Social Purpose','Rental','Family'], url:'https://edenhousing.org', units:'7,500+ units',
+    img:'https://picsum.photos/seed/eden/800/500' },
+  { id:11, type:'clt', name:'Peninsula Community Land Trust', city:'San Mateo', region:'Bay Area',
+    lat:37.563, lng:-122.325,
+    desc:'Preserving permanently affordable homes on the Peninsula — one of California\'s most expensive markets — through the community land trust model.',
+    tags:['CLT','Homeownership','Permanent'], url:'#', units:'60+ units' },
+  { id:12, type:'public', name:'Abode Communities', city:'Los Angeles', region:'Southern California',
+    lat:34.048, lng:-118.258,
+    desc:'LA-based nonprofit affordable housing developer creating high-quality permanently affordable homes, with a focus on transit-oriented and arts-integrated communities.',
+    tags:['Social Purpose','Transit-oriented','Arts'], url:'https://abodecommunities.org', units:'3,500+ units',
+    img:'https://picsum.photos/seed/abode/800/500' },
+  { id:13, type:'clt', name:'LA Community Land Trust', city:'Los Angeles', region:'Southern California',
+    lat:34.014, lng:-118.488,
+    desc:'Emerging community land trust in Los Angeles working to acquire and permanently steward affordable housing amid the city\'s severe displacement crisis.',
+    tags:['CLT','Anti-displacement','Tenant-led'], url:'#', units:'Developing' },
+  { id:14, type:'coop', name:'Peoples Self-Help Housing', city:'San Luis Obispo', region:'Central Coast',
+    lat:35.284, lng:-120.664,
+    desc:'Sweat-equity self-help homeownership cooperative serving farmworkers and low-income families on the Central Coast — 50+ years of community-built housing.',
+    tags:['Co-op','Self-Help','Rural','Farmworker'], url:'https://pshhc.org', units:'1,200+ units',
+    img:'https://picsum.photos/seed/pshhc/800/500' },
+  { id:15, type:'public', name:'Community Housing Works', city:'San Diego', region:'Southern California',
+    lat:32.722, lng:-117.158,
+    desc:'San Diego nonprofit developing and managing permanently affordable rental housing, with a strong focus on financial empowerment for residents.',
+    tags:['Social Purpose','Rental','Financial Empowerment'], url:'https://chworks.org', units:'2,000+ units' },
+  { id:16, type:'clt', name:'San Diego Community Land Trust', city:'San Diego', region:'Southern California',
+    lat:32.740, lng:-117.135,
+    desc:'Creating permanently affordable homeownership opportunities in San Diego neighborhoods experiencing rapid gentrification and displacement.',
+    tags:['CLT','Homeownership','Anti-displacement'], url:'#', units:'30+ units' },
+  { id:17, type:'public', name:'Fresno Housing Authority', city:'Fresno', region:'Central Valley',
+    lat:36.742, lng:-119.792,
+    desc:'Fresno Housing Authority\'s social purpose development program creating mixed-income permanently affordable communities in California\'s Central Valley.',
+    tags:['Public Housing','Mixed-income','Central Valley'], url:'https://fresnohousing.org', units:'3,000+ units',
+    img:'https://picsum.photos/seed/fresno/800/500' },
+  { id:18, type:'coop', name:'Mutual Housing California', city:'Sacramento', region:'Central Valley',
+    lat:38.548, lng:-121.496,
+    desc:'Resident-controlled affordable housing organization developing and managing cooperative and permanently affordable rental housing across the Sacramento region.',
+    tags:['Co-op','Resident-Controlled','Rental'], url:'https://mutualhousing.com', units:'1,800+ units' },
+  { id:19, type:'clt', name:'Elevate Housing Foundation', city:'Santa Cruz', region:'Central Coast',
+    lat:36.976, lng:-122.028,
+    desc:'Community land trust developing permanently affordable homes in Santa Cruz County — one of California\'s most extreme housing markets.',
+    tags:['CLT','Homeownership','Coastal'], url:'#', units:'20+ units' },
+  { id:20, type:'public', name:'Coachella Valley Housing Coalition', city:'Indio', region:'Inland Empire',
+    lat:33.722, lng:-116.218,
+    desc:'Building sweat-equity and permanently affordable homes for farmworkers and low-income families in California\'s desert communities.',
+    tags:['Social Purpose','Farmworker','Self-Help','Desert'], url:'https://cvhc.org', units:'5,000+ units',
+    img:'https://picsum.photos/seed/cvhc/800/500' }
+];
+
+// ── TYPE CONFIG ───────────────────────────────────────────────────────────
+const TYPE = {
+  clt:    { color:'#FFFFFF', label:'Community Land Trust' },
+  public: { color:'#7aaef0', label:'Public & Social Purpose' },
+  coop:   { color:'#f07a6a', label:'Limited-Equity Co-op' }
+};
+
+// ── PROJECTION ────────────────────────────────────────────────────────────
+// Maps lat/lng to SVG coordinate space
+// ViewBox is -30 -20 480 580 but coordinate origin same
+// x = (lng + 124.5) * (420/11)
+// y = (42.1 - lat) * (540/9.9)
+function project(lng, lat) {
+  const x = (lng + 124.5) * (420 / 11);
+  const y = (42.1 - lat) * (540 / 9.9);
+  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+}
+
+// ── SVG NAMESPACE ─────────────────────────────────────────────────────────
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const ringsLayer = document.getElementById('ringsLayer');
+const dotsLayer  = document.getElementById('dotsLayer');
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+const markerEls = []; // { loc, ring, dot, visible }
+const activeFilters = new Set(['clt','public','coop']);
+let activeId = null;
+
+// ── DECONFLICT OVERLAPPING MARKERS ───────────────────────────────────────
+// Detect pins within THRESHOLD px of each other and spiral them apart.
+// Runs once after all positions are projected.
+(function deconflict() {
+  const THRESHOLD = 18; // px — minimum distance between pin centers
+  const SPIRAL_STEP = 14; // px — spacing between positions in spiral
+  const MAX_SPIRAL = 8;  // max positions to try
+
+  // Collect projected positions
+  const positions = LOCATIONS.map(loc => {
+    const p = project(loc.lng, loc.lat);
+    return { id: loc.id, x: p.x, y: p.y, ox: p.x, oy: p.y };
+  });
+
+  function dist(a, b) {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+  }
+
+  function conflicts(pos, all, selfId) {
+    return all.some(p => p.id !== selfId && dist(p, pos) < THRESHOLD);
+  }
+
+  // For each pin that conflicts, try spiral positions
+  for (let i = 0; i < positions.length; i++) {
+    const p = positions[i];
+    if (!conflicts(p, positions, p.id)) continue;
+
+    // Try positions spiraling outward from origin
+    let placed = false;
+    for (let step = 1; step <= MAX_SPIRAL && !placed; step++) {
+      const angle_count = step * 6;
+      for (let a = 0; a < angle_count && !placed; a++) {
+        const angle = (a / angle_count) * 2 * Math.PI;
+        const r = step * SPIRAL_STEP * 0.6;
+        const candidate = {
+          x: p.ox + Math.cos(angle) * r,
+          y: p.oy + Math.sin(angle) * r
+        };
+        if (!conflicts(candidate, positions, p.id)) {
+          p.x = candidate.x;
+          p.y = candidate.y;
+          placed = true;
+        }
+      }
+    }
+  }
+
+  // Apply adjusted positions to LOCATIONS so marker creation uses them
+  positions.forEach(p => {
+    const loc = LOCATIONS.find(l => l.id === p.id);
+    if (loc) { loc._svgX = p.x; loc._svgY = p.y; }
+  });
+})();
+
+// ── BUILD MARKERS ─────────────────────────────────────────────────────────
+LOCATIONS.forEach((loc, i) => {
+  // Use deconflicted position if set, else project
+  const raw = project(loc.lng, loc.lat);
+  const x = loc._svgX !== undefined ? loc._svgX : raw.x;
+  const y = loc._svgY !== undefined ? loc._svgY : raw.y;
+  const col = TYPE[loc.type].color;
+  const delay = i * 55;
+
+  // Pulse ring (SVG animate)
+  const ring = document.createElementNS(SVG_NS, 'circle');
+  ring.setAttribute('cx', x);
+  ring.setAttribute('cy', y);
+  ring.setAttribute('r', '8');
+  ring.setAttribute('fill', 'none');
+  ring.setAttribute('stroke', col);
+  ring.setAttribute('stroke-width', '1.5');
+  ring.setAttribute('opacity', '0');
+
+  // Animate r
+  const animR = document.createElementNS(SVG_NS, 'animate');
+  animR.setAttribute('attributeName', 'r');
+  animR.setAttribute('from', '8'); animR.setAttribute('to', '20');
+  animR.setAttribute('dur', '2.4s');
+  animR.setAttribute('begin', `${delay}ms`);
+  animR.setAttribute('repeatCount', 'indefinite');
+  ring.appendChild(animR);
+
+  // Animate opacity
+  const animO = document.createElementNS(SVG_NS, 'animate');
+  animO.setAttribute('attributeName', 'opacity');
+  animO.setAttribute('from', '0.7'); animO.setAttribute('to', '0');
+  animO.setAttribute('dur', '2.4s');
+  animO.setAttribute('begin', `${delay}ms`);
+  animO.setAttribute('repeatCount', 'indefinite');
+  ring.appendChild(animO);
+
+  ringsLayer.appendChild(ring);
+
+  // Dot
+  const dot = document.createElementNS(SVG_NS, 'circle');
+  dot.setAttribute('cx', x);
+  dot.setAttribute('cy', y);
+  dot.setAttribute('r', '7');
+  dot.setAttribute('fill', col);
+  // CLT markers are white — use indigo stroke so they pop on marigold land
+  dot.setAttribute('stroke', col === '#FFFFFF' ? '#1E3A6E' : '#ffffff');
+  dot.setAttribute('stroke-width', '2');
+  dot.setAttribute('class', 'map-marker-dot');
+  dot.setAttribute('role', 'button');
+  dot.setAttribute('tabindex', '0');
+  dot.setAttribute('aria-label', loc.name);
+  dot.style.filter = `drop-shadow(0 2px 6px ${col}88)`;
+
+  // Drop-in animation
+  dot.style.opacity = '0';
+  dot.style.transform = `translate(0, -14px)`;
+  dot.style.transition = `opacity 0.4s ease ${delay}ms, transform 0.45s cubic-bezier(0.34,1.56,0.64,1) ${delay}ms`;
+  setTimeout(() => {
+    dot.style.opacity = '1';
+    dot.style.transform = 'translate(0, 0)';
+  }, 60);
+
+  dot.addEventListener('click', () => handleMarkerClick(loc, dot));
+  dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handleMarkerClick(loc, dot); });
+  dotsLayer.appendChild(dot);
+
+  markerEls.push({ loc, ring, dot, visible: true });
+});
+
+// ── DRAWER & MODAL ────────────────────────────────────────────────────────
+const drawer  = document.getElementById('drawer');
+const overlay = document.getElementById('drawerOverlay');
+const content = document.getElementById('drawerContent');
+const modal   = document.getElementById('modal');
+const modalContent = document.getElementById('modalContent');
+
+function handleMarkerClick(loc, dotEl) {
+  markerEls.forEach(m => {
+    m.dot.setAttribute('r', '7');
+    m.dot.style.filter = `drop-shadow(0 2px 6px ${TYPE[m.loc.type].color}88)`;
+  });
+  dotEl.setAttribute('r', '9');
+  dotEl.style.filter = `drop-shadow(0 3px 10px ${TYPE[loc.type].color}cc)`;
+  activeId = loc.id;
+  if (loc.img) {
+    openModal(loc);
+  } else {
+    openDrawer(loc);
+  }
+}
+
+function cardBody(loc, light = false) {
+  const cfg = TYPE[loc.type];
+  const nameColor = light ? '#ffffff' : cfg.color;
+  const badgeBg   = light ? 'rgba(255,255,255,0.18)' : `${cfg.color}1e`;
+  const badgeCol  = light ? '#ffffff' : cfg.color;
+  return `
+    <div class="drawer-type-badge" style="background:${badgeBg};color:${badgeCol}">
+      <span style="width:8px;height:8px;border-radius:50%;background:${light ? '#fff' : cfg.color};display:inline-block;flex-shrink:0"></span>
+      ${cfg.label}
+    </div>
+    <div class="drawer-name" ${light ? 'style="color:var(--indigo)"' : ''}>${loc.name}</div>
+    <div class="drawer-location">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      ${loc.city} · ${loc.region}
+      ${loc.units ? `<span style="margin-left:0.5rem;font-weight:700;color:#2A3F6E">${loc.units}</span>` : ''}
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-desc">${loc.desc}</div>
+    <div class="drawer-meta">
+      ${loc.tags.map(t => `<span class="drawer-tag">${t}</span>`).join('')}
+    </div>
+    ${loc.url !== '#' ? `<a href="${loc.url}" target="_blank" rel="noopener" class="drawer-link">Visit Organization →</a>` : ''}
+  `;
+}
+
+function openModal(loc) {
+  const cfg = TYPE[loc.type];
+  const ph = document.getElementById('modalImgPlaceholder');
+
+  // Build background: diagonal stripe pattern over type color
+  const c = cfg.color;
+  ph.style.background = `
+    repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 24px,
+      rgba(0,0,0,0.06) 24px,
+      rgba(0,0,0,0.06) 25px
+    ),
+    linear-gradient(160deg, ${c}cc 0%, ${c}88 100%)
+  `;
+
+  ph.innerHTML = `
+    <div class="ph-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div class="ph-label">Project Photo</div>
+    <div class="ph-name">${loc.name}</div>
+  `;
+
+  modalContent.innerHTML = cardBody(loc);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  overlay.classList.add('visible');
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  overlay.classList.remove('visible');
+  resetDots();
+}
+
+function openDrawer(loc) {
+  content.innerHTML = cardBody(loc);
+  drawer.classList.add('open');
+  overlay.classList.add('visible');
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  overlay.classList.remove('visible');
+  resetDots();
+}
+
+function resetDots() {
+  markerEls.forEach(m => {
+    m.dot.setAttribute('r', '7');
+    m.dot.style.filter = `drop-shadow(0 2px 6px ${TYPE[m.loc.type].color}88)`;
+  });
+  activeId = null;
+}
+
+function closeAll() {
+  closeDrawer();
+  closeModal();
+}
+
+overlay.addEventListener('click', closeAll);
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('modalClose').addEventListener('click', closeModal);
+
+// Close on map background click
+document.getElementById('caMap').addEventListener('click', e => {
+  if (e.target.id === 'caMap' || e.target.id === 'caShape' ||
+      e.target.tagName === 'rect' || e.target.tagName === 'path' ||
+      e.target.tagName === 'text') {
+    closeAll();
+  }
+});
+
+// ── FILTERS ───────────────────────────────────────────────────────────────
+const countEl = document.getElementById('mapCount');
+const emptyEl = document.getElementById('mapEmpty');
+
+function updateMarkers() {
+  let visible = 0;
+  markerEls.forEach(({ loc, ring, dot }) => {
+    const show = activeFilters.has(loc.type);
+    dot.style.display  = show ? '' : 'none';
+    ring.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  countEl.textContent = `${visible} location${visible !== 1 ? 's' : ''}`;
+  emptyEl.classList.toggle('visible', visible === 0);
+  closeDrawer();
+}
+
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    const type = pill.dataset.type;
+    if (type === 'all') {
+      const allOn = activeFilters.size === 3;
+      if (allOn) {
+        activeFilters.clear();
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      } else {
+        ['clt','public','coop'].forEach(t => activeFilters.add(t));
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.add('active'));
+      }
+    } else {
+      if (activeFilters.has(type)) { activeFilters.delete(type); pill.classList.remove('active'); }
+      else { activeFilters.add(type); pill.classList.add('active'); }
+      const allPill = document.querySelector('[data-type="all"]');
+      allPill.classList.toggle('active', activeFilters.size === 3);
+    }
+    updateMarkers();
+  });
+});
+
+updateMarkers();
+
+// ── PREVENT PINCH-ZOOM ON MAP ─────────────────────────────────────────────
+// position:fixed doesn't escape visual viewport scaling on mobile.
+// Block multi-touch on the SVG so the drawer always renders at normal size.
+const mapSvg = document.getElementById('caMap');
+mapSvg.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+mapSvg.addEventListener('touchmove', function(e) {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+// Also block double-tap zoom on the map
+let lastTap = 0;
+mapSvg.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  if (now - lastTap < 300) e.preventDefault();
+  lastTap = now;
+}, { passive: false });
+</script>
+</body>
+</html>
