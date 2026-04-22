@@ -6,8 +6,7 @@
 <title>Social Housing California — Housing as a Public Good</title>
 <meta name="description" content="Social Housing California is a statewide campaign for permanently affordable, community-governed housing. Learn about social housing, find projects near you, and take action.">
 
-<meta name="robots" content="noindex, nofollow">
-<meta name="googlebot" content="noindex, nofollow">
+<!-- Open Graph -->
 <meta property="og:title" content="Social Housing California"/>
 <meta property="og:description" content="Permanently affordable. Community-governed. California has the tools — and the moment — to build social housing at scale."/>
 <meta property="og:type" content="website"/>
@@ -622,6 +621,22 @@ a { color: var(--indigo); }
   margin-bottom: 0.4rem;
 }
 
+.brief-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  gap: 0.5rem;
+}
+.brief-meta-row .brief-label { margin-bottom: 0; }
+.brief-date {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
 .brief-title {
   font-size: 1.05rem;
   font-weight: 800;
@@ -729,6 +744,13 @@ a { color: var(--indigo); }
   text-align: center;
   transition: background 0.15s;
   line-height: 1.3;
+  text-decoration: none;
+}
+.partner-cell img {
+  max-height: 50px;
+  max-width: 100%;
+  width: auto;
+  object-fit: contain;
 }
 .partner-cell:hover { background: var(--sky-light); }
 
@@ -865,14 +887,12 @@ a { color: var(--indigo); }
   <div class="hero-overlay" aria-hidden="true"></div>
   <div class="hero-texture" aria-hidden="true"></div>
   <div class="hero-inner">
-    <span class="hero-eyebrow reveal">A statewide campaign</span>
+    <span class="hero-eyebrow reveal">[missing: hero_eyebrow]</span>
     <h1 id="hero-heading" class="reveal reveal-delay-1">
-      Housing that <em>stays</em> affordable. Forever.
+      [missing: hero_headline]
     </h1>
     <p class="hero-sub reveal reveal-delay-2">
-      Teachers, nurses, farmworkers, and families — the people who keep California running
-      increasingly can't afford to live here. Social housing is publicly financed,
-      community-governed, and permanently out of reach of speculation.
+      [missing: hero_sub]
     </p>
     <div class="hero-actions reveal reveal-delay-3">
       <a href="#act" class="btn-primary">Take Action</a>
@@ -886,16 +906,16 @@ a { color: var(--indigo); }
 <div class="stat-strip" aria-label="Key housing facts">
   <div class="stat-strip-inner">
     <div class="stat-item reveal">
-      <div class="stat-number">50%+</div>
-      <div class="stat-label">of California renters priced out of the market</div>
+      <div class="stat-number">{{page_copy.stat_1_number}}</div>
+      <div class="stat-label">{{page_copy.stat_1_label}}</div>
     </div>
     <div class="stat-item reveal reveal-delay-1">
-      <div class="stat-number">1M+</div>
-      <div class="stat-label">homes needed for low-income households by 2031</div>
+      <div class="stat-number">{{page_copy.stat_2_number}}</div>
+      <div class="stat-label">{{page_copy.stat_2_label}}</div>
     </div>
     <div class="stat-item reveal reveal-delay-2">
-      <div class="stat-number">0</div>
-      <div class="stat-label">years the private market has solved affordable housing</div>
+      <div class="stat-number">{{page_copy.stat_3_number}}</div>
+      <div class="stat-label">{{page_copy.stat_3_label}}</div>
     </div>
   </div>
 </div>
@@ -908,14 +928,10 @@ a { color: var(--indigo); }
         <p class="section-eyebrow">The Model</p>
         <h2 class="section-title" id="what-heading">What is social housing?</h2>
         <p class="section-body">
-          Social housing is publicly or community owned, mixed-income housing that stays
-          affordable forever — protected from real estate speculators and corporate landlords.
-          It's not a program. It's a system.
+          [missing: whatis_intro]
         </p>
         <p class="section-body" style="margin-top:0.75rem">
-          <strong style="color:var(--indigo)">California's housing crisis won't be solved one project at a time.</strong>
-          Building a few affordable units here and there creates islands of affordability
-          in a sea of speculation. We need a social housing system.
+          {{page_copy.whatis_intro_2}}
         </p>
       </div>
       <div class="what-image reveal reveal-delay-1">
@@ -1158,45 +1174,59 @@ a { color: var(--indigo); }
   </div>
 </section>
 
-<!-- ── POLICY BRIEFS ── -->
-<section class="briefs-section" id="learn" aria-labelledby="briefs-heading">
+<!-- ── RESOURCES ── -->
+<section class="briefs-section" id="resources" aria-labelledby="resources-heading">
   <div class="briefs-inner">
     <div class="reveal">
-      <p class="section-eyebrow">Policy</p>
-      <h2 class="section-title" id="briefs-heading">Read the briefs</h2>
-      <p class="section-body">Three policy briefs on how social housing works, who it's for, and how residents govern it.</p>
+      <p class="section-eyebrow">Library</p>
+      <h2 class="section-title" id="resources-heading">[missing: resources_headline]</h2>
+      <p class="section-body">[missing: resources_intro]</p>
     </div>
     <div class="briefs-grid">
-      <a href="briefs/system.html" class="brief-card reveal">
+      <!-- BUILD:resources:START -->
+      <a href="https://drive.google.com/" class="brief-card reveal"
+         target="_blank" rel="noopener">
         <div class="brief-card-top">
-          <div class="brief-label">Policy Brief</div>
+          <div class="brief-meta-row">
+            <span class="brief-label">Policy Brief</span>
+            <span class="brief-date">Mar 2026</span>
+          </div>
           <div class="brief-title">Designing a Social Housing System</div>
         </div>
         <div class="brief-card-body">
           <p class="brief-excerpt">California needs more than individual projects. A Social Housing Development Authority could plan, finance, and build at the scale the crisis demands.</p>
-          <span class="brief-read">Read the brief →</span>
+          <span class="brief-read">Read &rarr;</span>
         </div>
       </a>
-      <a href="briefs/who.html" class="brief-card reveal reveal-delay-1">
+      <a href="https://drive.google.com/" class="brief-card reveal"
+         target="_blank" rel="noopener">
         <div class="brief-card-top">
-          <div class="brief-label">Policy Brief</div>
+          <div class="brief-meta-row">
+            <span class="brief-label">Policy Brief</span>
+            <span class="brief-date">Mar 2026</span>
+          </div>
           <div class="brief-title">Who Is Social Housing For?</div>
         </div>
         <div class="brief-card-body">
-          <p class="brief-excerpt">Teachers, nurses, farmworkers — the people who keep California running increasingly can't afford to live here. Social housing prioritizes those the private market will never reach.</p>
-          <span class="brief-read">Read the brief →</span>
+          <p class="brief-excerpt">Teachers, nurses, farmworkers — the people who keep California running increasingly can&#x27;t afford to live here. Social housing prioritizes those the private market will never reach.</p>
+          <span class="brief-read">Read &rarr;</span>
         </div>
       </a>
-      <a href="briefs/governance.html" class="brief-card reveal reveal-delay-2">
+      <a href="https://drive.google.com/" class="brief-card reveal"
+         target="_blank" rel="noopener">
         <div class="brief-card-top">
-          <div class="brief-label">Policy Brief</div>
+          <div class="brief-meta-row">
+            <span class="brief-label">Policy Brief</span>
+            <span class="brief-date">Mar 2026</span>
+          </div>
           <div class="brief-title">Resident Governance</div>
         </div>
         <div class="brief-card-body">
           <p class="brief-excerpt">Social housing puts residents in control — not corporate landlords. Real decision-making power at the building, organizational, and program level.</p>
-          <span class="brief-read">Read the brief →</span>
+          <span class="brief-read">Read &rarr;</span>
         </div>
       </a>
+      <!-- BUILD:resources:END -->
     </div>
   </div>
 </section>
@@ -1206,15 +1236,15 @@ a { color: var(--indigo); }
   <div class="signup-inner">
     <div class="reveal">
       <p class="section-eyebrow">Get Involved</p>
-      <h2 class="section-title" id="act-heading">Join the campaign</h2>
+      <h2 class="section-title" id="act-heading">[missing: signup_headline]</h2>
       <p class="section-body">
-        Add your name and stay informed. We'll share updates on social housing
-        legislation, local organizing, and ways to take action across California.
+        [missing: signup_body]
       </p>
     </div>
     <div class="form-placeholder reveal">
-      <strong>Sign Up Form</strong>
-      123ContactForm embed — coming soon
+      <!-- form.123formbuilder.com script begins here -->
+      <script type="text/javascript" defer src="https://form.123formbuilder.com/embed/6951025.js" data-role="form" data-default-width="800px" data-custom-vars="hasEmbedFormStyle=1"></script>
+      <!-- form.123formbuilder.com script ends here -->
     </div>
   </div>
 </section>
@@ -1228,20 +1258,22 @@ a { color: var(--indigo); }
       <p class="section-body">Social Housing California is built with and for the organizations doing this work on the ground.</p>
     </div>
     <div class="partners-grid reveal">
-      <div class="partner-cell">ACCE</div>
-      <div class="partner-cell">Housing Now!</div>
-      <div class="partner-cell">CA Green New Deal Coalition</div>
-      <div class="partner-cell">CA CLT Network</div>
-      <div class="partner-cell">LiBRE</div>
-      <div class="partner-cell">Power California</div>
-      <div class="partner-cell">PolicyLink</div>
-      <div class="partner-cell">Tenants Together</div>
-      <div class="partner-cell">Public Advocates</div>
-      <div class="partner-cell">ACT-LA</div>
-      <div class="partner-cell">SF Community Land Trust</div>
-      <div class="partner-cell">Sustainable Economies Law Center</div>
-      <div class="partner-cell">PICO California</div>
-      <div class="partner-cell">LA Housing Movement Lab</div>
+      <!-- BUILD:partners:START -->
+      <a class="partner-cell" href="https://acceaction.org" target="_blank" rel="noopener" title="ACCE">ACCE</a>
+      <div class="partner-cell" title="Housing Now!">Housing Now!</div>
+      <div class="partner-cell" title="CA Green New Deal Coalition">CA Green New Deal Coalition</div>
+      <div class="partner-cell" title="CA CLT Network">CA CLT Network</div>
+      <div class="partner-cell" title="LiBRE">LiBRE</div>
+      <div class="partner-cell" title="Power California">Power California</div>
+      <a class="partner-cell" href="https://policylink.org" target="_blank" rel="noopener" title="PolicyLink">PolicyLink</a>
+      <a class="partner-cell" href="https://tenantstogether.org" target="_blank" rel="noopener" title="Tenants Together">Tenants Together</a>
+      <a class="partner-cell" href="https://publicadvocates.org" target="_blank" rel="noopener" title="Public Advocates">Public Advocates</a>
+      <a class="partner-cell" href="https://allianceforcommunitytransit.org" target="_blank" rel="noopener" title="ACT-LA">ACT-LA</a>
+      <a class="partner-cell" href="https://sfclt.org" target="_blank" rel="noopener" title="SF Community Land Trust">SF Community Land Trust</a>
+      <a class="partner-cell" href="https://theselc.org" target="_blank" rel="noopener" title="Sustainable Economies Law Center">Sustainable Economies Law Center</a>
+      <a class="partner-cell" href="https://picocalifornia.org" target="_blank" rel="noopener" title="PICO California">PICO California</a>
+      <div class="partner-cell" title="LA Housing Movement Lab">LA Housing Movement Lab</div>
+      <!-- BUILD:partners:END -->
     </div>
   </div>
 </section>
@@ -1258,7 +1290,7 @@ a { color: var(--indigo); }
         <li><a href="#what">The Model</a></li>
         <li><a href="#map">The Map</a></li>
         <li><a href="#who">Who It's For</a></li>
-        <li><a href="#learn">Policy Briefs</a></li>
+        <li><a href="#resources">Resources</a></li>
         <li><a href="#act">Take Action</a></li>
         <li><a href="#partners">Partners</a></li>
         <li><a href="privacy.html">Privacy Policy</a></li>

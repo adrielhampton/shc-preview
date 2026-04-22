@@ -721,98 +721,34 @@ html, body {
 
 <script>
 // ── LOCATION DATA ─────────────────────────────────────────────────────────
-const LOCATIONS = [
-  { id:1, type:'clt', name:'San Francisco Community Land Trust', city:'San Francisco', region:'Bay Area',
-    lat:37.770, lng:-122.408,
-    desc:'Acquires and permanently stewards affordable housing in SF, converting tenant-occupied buildings into community-owned assets that remain affordable in perpetuity.',
-    tags:['CLT','Tenant-Led','Multi-family'], url:'https://sfclt.org', units:'40+ units',
-    img:'https://picsum.photos/seed/sfclt/800/500' },
-  { id:2, type:'coop', name:'East Bay Permanent Real Estate Cooperative', city:'Oakland', region:'Bay Area',
-    lat:37.812, lng:-122.265,
-    desc:'Community-owned real estate cooperative focused on permanently affordable housing and community wealth-building in East Bay neighborhoods.',
-    tags:['Co-op','BIPOC-led','Community Wealth'], url:'https://ebprec.org', units:'30+ units',
-    img:'https://picsum.photos/seed/ebprec/800/500' },
-  { id:3, type:'clt', name:'Oakland Community Land Trust', city:'Oakland', region:'Bay Area',
-    lat:37.796, lng:-122.240,
-    desc:'Acquires land and buildings in Oakland to preserve affordability and prevent displacement of long-term residents in gentrifying neighborhoods.',
-    tags:['CLT','Anti-displacement','Multi-family'], url:'https://oaklandclt.org', units:'100+ units' },
-  { id:4, type:'public', name:'BRIDGE Housing — Tassafaronga Village', city:'Oakland', region:'Bay Area',
-    lat:37.758, lng:-122.198,
-    desc:'Award-winning mixed-income community developed on former public housing land — 157 affordable rental units with extensive community services.',
-    tags:['Social Purpose','Mixed-income','Rental'], url:'https://bridgehousing.com', units:'157 units',
-    img:'https://picsum.photos/seed/bridge/800/500' },
-  { id:5, type:'clt', name:'Champaign County CLT (CA Chapter)', city:'Berkeley', region:'Bay Area',
-    lat:37.880, lng:-122.278,
-    desc:'A community-controlled land trust working to permanently remove housing from the speculative market in Berkeley and surrounding communities.',
-    tags:['CLT','Homeownership','Permanent'], url:'#', units:'25+ units' },
-  { id:6, type:'public', name:'Tenderloin Neighborhood Development Corp', city:'San Francisco', region:'Bay Area',
-    lat:37.784, lng:-122.413,
-    desc:'Nonprofit developer providing permanently affordable housing and services in the Tenderloin, one of SF\'s most underserved neighborhoods.',
-    tags:['Social Purpose','SRO','Supportive'], url:'https://tndc.org', units:'2,500+ units',
-    img:'https://picsum.photos/seed/tndc/800/500' },
-  { id:7, type:'clt', name:'Dos Rios Community Land Trust', city:'Sacramento', region:'Central Valley',
-    lat:38.590, lng:-121.490,
-    desc:'Developing permanently affordable homeownership in Sacramento\'s underserved neighborhoods through a community land trust model.',
-    tags:['CLT','Homeownership','Latinx-serving'], url:'#', units:'Developing' },
-  { id:8, type:'public', name:'Resources for Community Development', city:'Berkeley', region:'Bay Area',
-    lat:37.856, lng:-122.282,
-    desc:'Nonprofit affordable housing developer creating diverse, high-quality permanently affordable rental housing across the East Bay.',
-    tags:['Social Purpose','Rental','Supportive'], url:'https://rcdhousing.org', units:'1,000+ units',
-    img:'https://picsum.photos/seed/rcd/800/500' },
-  { id:9, type:'coop', name:'Co-op Center FCU Housing', city:'Berkeley', region:'Bay Area',
-    lat:37.864, lng:-122.256,
-    desc:'Credit union-backed limited-equity cooperative housing preserving affordable units for working families in the East Bay.',
-    tags:['Co-op','Limited-equity','Credit Union'], url:'#', units:'45 units' },
-  { id:10, type:'public', name:'Eden Housing', city:'Hayward', region:'Bay Area',
-    lat:37.669, lng:-122.086,
-    desc:'One of California\'s largest affordable housing nonprofits, developing and managing permanently affordable rental communities across the Bay Area.',
-    tags:['Social Purpose','Rental','Family'], url:'https://edenhousing.org', units:'7,500+ units',
-    img:'https://picsum.photos/seed/eden/800/500' },
-  { id:11, type:'clt', name:'Peninsula Community Land Trust', city:'San Mateo', region:'Bay Area',
-    lat:37.563, lng:-122.325,
-    desc:'Preserving permanently affordable homes on the Peninsula — one of California\'s most expensive markets — through the community land trust model.',
-    tags:['CLT','Homeownership','Permanent'], url:'#', units:'60+ units' },
-  { id:12, type:'public', name:'Abode Communities', city:'Los Angeles', region:'Southern California',
-    lat:34.048, lng:-118.258,
-    desc:'LA-based nonprofit affordable housing developer creating high-quality permanently affordable homes, with a focus on transit-oriented and arts-integrated communities.',
-    tags:['Social Purpose','Transit-oriented','Arts'], url:'https://abodecommunities.org', units:'3,500+ units',
-    img:'https://picsum.photos/seed/abode/800/500' },
-  { id:13, type:'clt', name:'LA Community Land Trust', city:'Los Angeles', region:'Southern California',
-    lat:34.014, lng:-118.488,
-    desc:'Emerging community land trust in Los Angeles working to acquire and permanently steward affordable housing amid the city\'s severe displacement crisis.',
-    tags:['CLT','Anti-displacement','Tenant-led'], url:'#', units:'Developing' },
-  { id:14, type:'coop', name:'Peoples Self-Help Housing', city:'San Luis Obispo', region:'Central Coast',
-    lat:35.284, lng:-120.664,
-    desc:'Sweat-equity self-help homeownership cooperative serving farmworkers and low-income families on the Central Coast — 50+ years of community-built housing.',
-    tags:['Co-op','Self-Help','Rural','Farmworker'], url:'https://pshhc.org', units:'1,200+ units',
-    img:'https://picsum.photos/seed/pshhc/800/500' },
-  { id:15, type:'public', name:'Community Housing Works', city:'San Diego', region:'Southern California',
-    lat:32.722, lng:-117.158,
-    desc:'San Diego nonprofit developing and managing permanently affordable rental housing, with a strong focus on financial empowerment for residents.',
-    tags:['Social Purpose','Rental','Financial Empowerment'], url:'https://chworks.org', units:'2,000+ units' },
-  { id:16, type:'clt', name:'San Diego Community Land Trust', city:'San Diego', region:'Southern California',
-    lat:32.740, lng:-117.135,
-    desc:'Creating permanently affordable homeownership opportunities in San Diego neighborhoods experiencing rapid gentrification and displacement.',
-    tags:['CLT','Homeownership','Anti-displacement'], url:'#', units:'30+ units' },
-  { id:17, type:'public', name:'Fresno Housing Authority', city:'Fresno', region:'Central Valley',
-    lat:36.742, lng:-119.792,
-    desc:'Fresno Housing Authority\'s social purpose development program creating mixed-income permanently affordable communities in California\'s Central Valley.',
-    tags:['Public Housing','Mixed-income','Central Valley'], url:'https://fresnohousing.org', units:'3,000+ units',
-    img:'https://picsum.photos/seed/fresno/800/500' },
-  { id:18, type:'coop', name:'Mutual Housing California', city:'Sacramento', region:'Central Valley',
-    lat:38.548, lng:-121.496,
-    desc:'Resident-controlled affordable housing organization developing and managing cooperative and permanently affordable rental housing across the Sacramento region.',
-    tags:['Co-op','Resident-Controlled','Rental'], url:'https://mutualhousing.com', units:'1,800+ units' },
-  { id:19, type:'clt', name:'Elevate Housing Foundation', city:'Santa Cruz', region:'Central Coast',
-    lat:36.976, lng:-122.028,
-    desc:'Community land trust developing permanently affordable homes in Santa Cruz County — one of California\'s most extreme housing markets.',
-    tags:['CLT','Homeownership','Coastal'], url:'#', units:'20+ units' },
-  { id:20, type:'public', name:'Coachella Valley Housing Coalition', city:'Indio', region:'Inland Empire',
-    lat:33.722, lng:-116.218,
-    desc:'Building sweat-equity and permanently affordable homes for farmworkers and low-income families in California\'s desert communities.',
-    tags:['Social Purpose','Farmworker','Self-Help','Desert'], url:'https://cvhc.org', units:'5,000+ units',
-    img:'https://picsum.photos/seed/cvhc/800/500' }
+<!-- BUILD:map_data:START -->
+    const LOCATIONS = [
+  {
+    "id": "sf-clt-1",
+    "type": "sf-clt-1",
+    "name": "San Francisco Community Land Trust",
+    "city": "San Francisco",
+    "region": "Bay Area",
+    "lat": 37.77,
+    "lng": -122.408,
+    "desc": "Acquires and permanently stewards affordable housing in SF, converting tenant-occupied buildings into community-owned assets.",
+    "units": "40+ units",
+    "url": "https://sfclt.org/"
+  },
+  {
+    "id": "oak-coop-1",
+    "type": "coop",
+    "name": "East Bay Permanent Real Estate Cooperative",
+    "city": "Oakland",
+    "region": "Bay Area",
+    "lat": 37.812,
+    "lng": -122.265,
+    "desc": "Community-owned real estate cooperative focused on permanently affordable housing and community wealth-building.",
+    "units": "30+ units",
+    "url": "https://ebprec.org/"
+  }
 ];
+      <!-- BUILD:map_data:END -->
 
 // ── TYPE CONFIG ───────────────────────────────────────────────────────────
 const TYPE = {
@@ -1007,7 +943,7 @@ function cardBody(loc, light = false) {
     <div class="drawer-divider"></div>
     <div class="drawer-desc">${loc.desc}</div>
     <div class="drawer-meta">
-      ${loc.tags.map(t => `<span class="drawer-tag">${t}</span>`).join('')}
+      ${(loc.tags || []).map(t => `<span class="drawer-tag">${t}</span>`).join('')}
     </div>
     ${loc.url !== '#' ? `<a href="${loc.url}" target="_blank" rel="noopener" class="drawer-link">Visit Organization →</a>` : ''}
   `;
