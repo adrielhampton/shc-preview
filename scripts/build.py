@@ -53,13 +53,26 @@ CSV_URL = (
 # ---------------------------------------------------------------------------
 
 def fetch_tab(tab_name: str) -> list[dict]:
-    """Fetch one tab as a list of dicts."""
+    """Fetch one tab as a list of dicts. Handles BOM and whitespace in headers."""
     url = CSV_URL.format(sid=SHEET_ID, tab=tab_name)
     r = requests.get(url, timeout=30)
     r.raise_for_status()
-    reader = csv.DictReader(io.StringIO(r.text))
-    rows = [row for row in reader]
-    print(f"  {tab_name}: {len(rows)} rows")
+    # Strip UTF-8 BOM if Google included one
+    text = r.text
+    if text.startswith("\ufeff"):
+        text = text[1:]
+    reader = csv.DictReader(io.StringIO(text))
+    rows = []
+    for row in reader:
+        # Normalize header keys: strip whitespace, lowercase
+        cleaned = {}
+        for k, v in row.items():
+            if k is None:
+                continue
+            nk = k.strip().lower()
+            cleaned[nk] = v.strip() if isinstance(v, str) else v
+        rows.append(cleaned)
+    print(f"  {tab_name}: {len(rows)} rows, headers={reader.fieldnames}")
     return rows
 
 
@@ -77,7 +90,9 @@ def is_active(row: dict) -> bool:
 
 def render_page_copy(rows: list[dict]) -> dict[str, str]:
     """page_copy tab is a key/value lookup."""
-    return {r["key"]: r.get("value", "") for r in rows if r.get("key")}
+    result = {r["key"]: r.get("value", "") for r in rows if r.get("key")}
+    print(f"  page_copy loaded {len(result)} keys: {sorted(result.keys())}")
+    return result
 
 
 def render_resources(rows: list[dict]) -> str:
