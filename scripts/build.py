@@ -225,7 +225,7 @@ def inject_page_copy(html: str, copy: dict[str, str]) -> str:
         key = match.group(1).strip()
         return escape(copy.get(key, f"[missing: {key}]"))
 
-    return re.sub(r"\{\{\s*page_copy\.([a-z_]+)\s*\}\}", sub, html)
+    return re.sub(r"\{\{\s*page_copy\.([a-z_0-9]+)\s*\}\}", sub, html)
 
 
 # ---------------------------------------------------------------------------
