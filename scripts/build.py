@@ -44,7 +44,7 @@ TABS = {
 
 CSV_URL = (
     "https://docs.google.com/spreadsheets/d/{sid}/gviz/tq"
-    "?tqx=out:csv&sheet={tab}"
+    "?tqx=out:csv&sheet={tab}&headers=1"
 )
 
 
