@@ -434,68 +434,355 @@ a { color: var(--indigo); }
 .map-section .section-title { color: var(--white); }
 .map-section .section-body { color: rgba(255,255,255,0.7); }
 
-.map-preview-wrap {
-  margin-top: 2rem;
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--indigo-d);
-  border: 1px solid rgba(255,255,255,0.08);
-  position: relative;
-}
-
-/* Inline map preview SVG container */
-.map-preview-svg {
-  width: 100%;
-  display: block;
-  max-height: 420px;
-}
-
-.map-cta-overlay {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(10,20,45,0.95) 0%, transparent 100%);
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.map-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.legend-item {
+/* ── MAP — LEGEND STRIP ───────────────────────────── */
+.map-legend-strip {
+  margin: 1.75rem 0 1rem;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.65);
-  font-weight: 500;
+  gap: 0.55rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0.25rem;
+}
+.map-legend-strip::-webkit-scrollbar { display: none; }
+
+.legend-label {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-right: 0.2rem;
+}
+
+.legend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 100px;
+  border: 1.5px solid rgba(255,255,255,0.14);
+  font-family: var(--font);
+  font-size: 0.73rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.7);
+  user-select: none;
 }
 
 .legend-dot {
-  width: 9px; height: 9px;
+  width: 8px; height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* ── MAP — INTERACTIVE CANVAS ─────────────────────── */
+.map-canvas {
+  position: relative;
+  width: 100%;
+  background: var(--indigo-x);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  /* Mobile: portrait aspect matching CA viewBox, capped so it never dominates */
+  aspect-ratio: 480 / 580;
+  max-height: 78vh;
+}
+
+#caMap {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Allow page to scroll vertically while map is touched; markers still tappable */
+  touch-action: pan-y;
+}
+
+.map-marker-dot {
+  cursor: pointer;
+  transition: r 0.15s ease;
+}
+.map-marker-dot:hover { r: 9px; }
+
+/* All SVG elements are pointer-transparent except the dots themselves */
+#caMap * { pointer-events: none; }
+#caMap .map-marker-dot { pointer-events: all; }
+
+/* ── MAP — DRAWER ─────────────────────────────────── */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 300;
+  pointer-events: none;
+  transition: background 0.25s;
+}
+.drawer-overlay.visible {
+  background: rgba(10,18,40,0.5);
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--white);
+  border-radius: 16px 16px 0 0;
+  padding: 0 1.25rem 2rem;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 400;
+  max-height: 62vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.drawer.open { transform: translateY(0); }
+
+.drawer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0 0.4rem;
+  margin-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+.drawer-top::before {
+  content: '';
+  width: 32px;
   flex-shrink: 0;
 }
 
-.map-explore-btn {
-  background: var(--marigold);
-  color: var(--indigo);
-  font-family: var(--font);
+.drawer-handle {
+  width: 36px; height: 4px;
+  background: #D0D5E8;
+  border-radius: 2px;
+  flex: 1;
+  margin: 0 auto;
+  max-width: 36px;
+}
+
+.drawer-close {
+  background: var(--pearl);
+  border: none;
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--meta-txt);
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.drawer-close:hover { background: #E0E4F0; color: var(--indigo); }
+
+.drawer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+.drawer-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.58rem;
+  border-radius: 100px;
+  font-size: 0.67rem;
   font-weight: 700;
-  font-size: 0.82rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--radius);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1.5px solid transparent;
+}
+
+.drawer-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--indigo);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.12rem;
+}
+
+.drawer-project {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--marigold);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.drawer-location {
+  font-size: 0.78rem;
+  color: var(--meta-txt);
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.drawer-media {
+  width: calc(100% + 2.5rem);
+  margin: 0 -1.25rem 1.1rem;
+  height: 172px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.drawer-media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.drawer-media.ph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--indigo-d);
+}
+
+.ph-stripes {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 18px,
+    var(--ph-stripe) 18px,
+    var(--ph-stripe) 19px
+  );
+}
+
+.ph-icon { position: relative; z-index: 1; opacity: 0.55; }
+
+.ph-text {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.ph-org {
+  font-family: var(--font);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.82);
+  letter-spacing: -0.01em;
+  padding: 0 1rem;
+  line-height: 1.3;
+}
+
+.ph-region {
+  font-family: var(--font);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.drawer-divider { height: 1px; background: #E8EBF4; margin: 0.75rem 0; }
+.drawer-desc { font-size: 0.86rem; line-height: 1.65; color: #3A4560; }
+
+.drawer-link {
+  display: block;
+  margin-top: 1.1rem;
+  background: var(--indigo);
+  color: var(--white);
   text-decoration: none;
-  white-space: nowrap;
+  text-align: center;
+  padding: 0.82rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.86rem;
   transition: background 0.15s;
 }
-.map-explore-btn:hover { background: var(--marigold-d); }
+.drawer-link:hover { background: var(--indigo-d); }
+
+/* ── MAP — VIDEO / IMAGE MODAL ────────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: var(--white);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+}
+.modal.open { transform: translateY(0); }
+
+.modal-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 55vh;
+  flex-shrink: 0;
+  background: var(--indigo-d);
+  overflow: hidden;
+}
+
+.modal-img-gradient {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.85) 80%, var(--white) 100%);
+  pointer-events: none;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(15, 30, 60, 0.55);
+  backdrop-filter: blur(8px);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  z-index: 10;
+}
+.modal-close:hover { background: rgba(15, 30, 60, 0.8); }
+
+.modal-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 1.25rem 2.5rem;
+  margin-top: -1.5rem;
+  position: relative;
+}
+
+.modal.video .modal-img-wrap {
+  height: auto;
+  padding-bottom: 56.25%;
+  background: #000;
+}
+.modal.video .modal-img-gradient { display: none; }
+.modal.video .modal-content { margin-top: 0; }
+
+.video-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
 
 /* ── WHO SECTION ──────────────────────────────────── */
 .who-section {
@@ -810,6 +1097,108 @@ a { color: var(--indigo); }
 }
 .footer-bottom a { color: rgba(255,255,255,0.3); text-decoration: none; }
 
+/* ── STORIES ──────────────────────────────────────── */
+.stories-section {
+  padding: 4rem var(--pad);
+  background: var(--white);
+}
+
+.stories-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+.stories-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.story-card {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid #DDE1EC;
+  transition: box-shadow 0.15s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+}
+.story-card:hover {
+  box-shadow: 0 8px 24px rgba(30,58,110,0.1);
+  transform: translateY(-2px);
+}
+
+.story-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--indigo-x);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.story-media iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.story-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.story-body {
+  background: var(--indigo);
+  padding: 1.25rem;
+  border-top: 3px solid var(--marigold);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.story-org {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--marigold);
+}
+
+.story-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.story-excerpt {
+  font-size: 0.825rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.72);
+  margin-top: 0.25rem;
+  flex: 1;
+}
+
+.story-read {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--marigold);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s;
+}
+.story-read:hover { opacity: 0.75; }
+
 /* ── BREAKPOINTS ──────────────────────────────────── */
 @media (min-width: 600px) {
   :root { --pad: 1.75rem; }
@@ -822,6 +1211,8 @@ a { color: var(--indigo); }
   .who-grid   { grid-template-columns: 1fr 1fr; }
 
   .briefs-grid { grid-template-columns: 1fr 1fr 1fr; }
+
+  .stories-grid { grid-template-columns: 1fr 1fr; }
 
   .partners-grid { grid-template-columns: repeat(3, 1fr); }
 
@@ -842,6 +1233,57 @@ a { color: var(--indigo); }
   .what-grid { grid-template-columns: repeat(3, 1fr); }
 
   .partners-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── MAP — TABLET / DESKTOP OVERRIDES ─────────────── */
+@media (min-width: 700px) {
+  /* Canvas becomes a landscape-feeling band; CA letterboxes within. */
+  .map-canvas {
+    aspect-ratio: auto;
+    height: clamp(520px, 70vh, 720px);
+    max-height: 75vh;
+  }
+
+  /* Drawer becomes a floating card pinned to the lower-right of the viewport. */
+  .drawer {
+    position: fixed;
+    max-width: 420px;
+    left: auto;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    border-radius: 12px;
+    max-height: 74vh;
+    transform: translateY(12px);
+    opacity: 0;
+    transition: transform 0.26s cubic-bezier(0.32,0.72,0,1), opacity 0.26s ease;
+  }
+  .drawer.open { transform: translateY(0); opacity: 1; }
+  .drawer-handle { display: none; }
+  .drawer-overlay.visible { background: transparent; pointer-events: none; }
+  .drawer-top { justify-content: flex-end; padding-top: 0.6rem; }
+  .drawer-top::before { display: none; }
+
+  .drawer-media {
+    height: 188px;
+    width: 100%;
+    margin: 0 0 1.1rem;
+  }
+
+  /* Modal centers as a card. */
+  .modal {
+    inset: auto;
+    top: 50%; left: 50%;
+    transform: translate(-50%, calc(-50% + 30px));
+    opacity: 0;
+    pointer-events: none;
+    width: min(520px, 90vw);
+    max-height: 85vh;
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    transition: transform 0.28s cubic-bezier(0.32,0.72,0,1), opacity 0.28s ease;
+  }
+  .modal.open { transform: translate(-50%, -50%); opacity: 1; pointer-events: auto; }
+  .modal-img-wrap { height: 260px; border-radius: 14px 14px 0 0; }
 }
 </style>
 </head>
@@ -936,8 +1378,8 @@ a { color: var(--indigo); }
       </div>
       <div class="what-image reveal reveal-delay-1">
         <img
-          src="https://raw.githubusercontent.com/adrielhampton/hosted-images/refs/heads/main/kara-peak-vxhV5yYDEwY-unsplash.jpg"
-          alt="California residential neighborhood"
+          src="https://raw.githubusercontent.com/adrielhampton/shc-preview/refs/heads/main/images/IMG_Jamie_Lane_Homes.JPG"
+          alt="Jamie Lane Homes — permanently affordable social housing in California"
           loading="lazy"
         />
       </div>
@@ -980,141 +1422,112 @@ a { color: var(--indigo); }
       <h2 class="section-title" id="map-heading">Social housing across California</h2>
       <p class="section-body">
         Community land trusts, co-ops, and social purpose developers are already building
-        permanently affordable housing in communities across the state.
+        permanently affordable housing in communities across the state. Tap a marker to learn more.
       </p>
     </div>
 
-    <div class="map-preview-wrap reveal">
-      <!-- Inline SVG map preview — zero external dependencies -->
-      <svg class="map-preview-svg"
-           viewBox="-30 -20 480 580"
-           preserveAspectRatio="xMidYMid meet"
-           role="img"
-           aria-label="Map of California showing social housing locations">
-        <defs>
+    <!-- Legend (decorative — markers themselves are the interactive elements) -->
+    <div class="map-legend-strip reveal" role="list" aria-label="Housing type legend">
+      <span class="legend-label">Key:</span>
+      <span class="legend-pill" role="listitem">
+        <span class="legend-dot" style="background:#FFFFFF;box-shadow:0 0 0 1.5px #1E3A6E inset"></span>
+        Community Land Trust
+      </span>
+      <span class="legend-pill" role="listitem">
+        <span class="legend-dot" style="background:#f07a6a"></span>
+        Limited-Equity Co-op
+      </span>
+      <span class="legend-pill" role="listitem">
+        <span class="legend-dot" style="background:#7aaef0"></span>
+        Mission-Aligned Nonprofit
+      </span>
+      <span class="legend-pill" role="listitem">
+        <span class="legend-dot" style="background:#52C98A"></span>
+        Resident-Owned Park
+      </span>
+    </div>
+
+    <!-- Interactive map canvas -->
+    <div class="map-canvas reveal">
+      <svg id="caMap"
+        viewBox="-30 -20 480 580"
+        preserveAspectRatio="xMidYMid meet"
+        role="application"
+        aria-label="Interactive map of social housing projects in California">
+
+        <defs id="svgDefs">
           <pattern id="oceanLines" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
-            <line x1="0" y1="0" x2="0" y2="24" stroke="rgba(74,120,196,0.06)" stroke-width="1"/>
+            <line x1="0" y1="0" x2="0" y2="24" stroke="rgba(74,120,196,0.07)" stroke-width="1"/>
           </pattern>
-          <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
-            <feGaussianBlur stdDeviation="5" result="blur"/>
+          <filter id="stateGlow" x="-5%" y="-5%" width="110%" height="110%">
+            <feGaussianBlur stdDeviation="6" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+          <filter id="markerGlow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
             <feComposite in="SourceGraphic" in2="blur" operator="over"/>
           </filter>
           <linearGradient id="stateGrad" x1="0" y1="0" x2="0.3" y2="1">
             <stop offset="0%" stop-color="#F5B830"/>
             <stop offset="100%" stop-color="#D9900C"/>
           </linearGradient>
+          <!-- Split gradients injected here by JS -->
         </defs>
 
-        <!-- Ocean -->
+        <!-- Ocean background -->
         <rect x="-30" y="-20" width="480" height="580" fill="#0d1c38"/>
         <rect x="-30" y="-20" width="480" height="580" fill="url(#oceanLines)"/>
 
         <!-- Vignette -->
-        <radialGradient id="vignette2" cx="50%" cy="50%" r="70%">
+        <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
           <stop offset="0%" stop-color="transparent"/>
-          <stop offset="100%" stop-color="rgba(5,10,25,0.5)"/>
+          <stop offset="100%" stop-color="rgba(5,10,25,0.55)"/>
         </radialGradient>
-        <rect x="-30" y="-20" width="480" height="580" fill="url(#vignette2)"/>
+        <rect x="-30" y="-20" width="480" height="580" fill="url(#vignette)"/>
 
         <!-- State shadow -->
         <path d="M 12,6 L 4,55 L 4,93 L 15,126 L 27,169 L 48,199 L 57,207 L 61,224 L 72,232 L 80,240 L 85,252 L 76,268 L 76,273 L 96,284 L 99,300 L 108,322 L 118,338 L 132,358 L 138,366 L 147,395 L 153,415 L 165,424 L 183,433 L 210,440 L 229,442 L 241,452 L 252,464 L 260,475 L 270,495 L 279,513 L 283,524 L 374,524 L 378,513 L 378,393 L 359,360 L 286,306 L 233,235 L 172,169 L 172,6 Z"
-          fill="#F2A30F" opacity="0.25" filter="url(#glow)" transform="translate(3,4)"/>
+          fill="#F2A30F" opacity="0.3" filter="url(#stateGlow)" transform="translate(3,4)"/>
 
         <!-- State body -->
-        <path d="M 12,6 L 4,55 L 4,93 L 15,126 L 27,169 L 48,199 L 57,207 L 61,224 L 72,232 L 80,240 L 85,252 L 76,268 L 76,273 L 96,284 L 99,300 L 108,322 L 118,338 L 132,358 L 138,366 L 147,395 L 153,415 L 165,424 L 183,433 L 210,440 L 229,442 L 241,452 L 252,464 L 260,475 L 270,495 L 279,513 L 283,524 L 374,524 L 378,513 L 378,393 L 359,360 L 286,306 L 233,235 L 172,169 L 172,6 Z"
+        <path id="caShape" d="M 12,6 L 4,55 L 4,93 L 15,126 L 27,169 L 48,199 L 57,207 L 61,224 L 72,232 L 80,240 L 85,252 L 76,268 L 76,273 L 96,284 L 99,300 L 108,322 L 118,338 L 132,358 L 138,366 L 147,395 L 153,415 L 165,424 L 183,433 L 210,440 L 229,442 L 241,452 L 252,464 L 260,475 L 270,495 L 279,513 L 283,524 L 374,524 L 378,513 L 378,393 L 359,360 L 286,306 L 233,235 L 172,169 L 172,6 Z"
           fill="url(#stateGrad)" stroke="#B87A0A" stroke-width="1.5" stroke-linejoin="round"/>
+
+        <!-- Sierra Nevada ridge hint -->
+        <path d="M 172,100 L 175,140 L 178,169 L 185,200 L 193,220 L 200,245"
+          stroke="rgba(180,110,0,0.25)" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+        <!-- Central Valley -->
+        <ellipse cx="165" cy="290" rx="40" ry="90"
+          fill="rgba(255,200,50,0.08)" transform="rotate(-10,165,290)"/>
 
         <!-- Coast glow -->
         <path d="M 12,6 L 4,55 L 4,93 L 15,126 L 27,169 L 48,199 L 57,207 L 61,224 L 72,232 L 80,240 L 85,252 L 76,268 L 76,273 L 96,284 L 99,300 L 108,322 L 118,338 L 132,358 L 138,366 L 147,395 L 153,415 L 165,424 L 183,433 L 210,440 L 229,442 L 241,452 L 252,464 L 260,475 L 270,495 L 279,513 L 283,524"
-          fill="none" stroke="rgba(255,210,80,0.4)" stroke-width="2" stroke-linecap="round"/>
+          fill="none" stroke="rgba(255,210,80,0.45)" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
 
         <!-- City labels -->
-        <g font-family="'Sora',system-ui" fill="rgba(15,35,80,0.55)" font-size="8" font-weight="700" letter-spacing="0.06em">
-          <circle cx="80" cy="235" r="2" fill="rgba(15,35,80,0.35)"/>
-          <text x="86" y="239">SF</text>
-          <circle cx="115" cy="191" r="2" fill="rgba(15,35,80,0.35)"/>
-          <text x="121" y="195">SAC</text>
-          <circle cx="235" cy="440" r="2" fill="rgba(15,35,80,0.35)"/>
-          <text x="213" y="453">LOS ANGELES</text>
-          <circle cx="279" cy="510" r="2" fill="rgba(15,35,80,0.35)"/>
-          <text x="252" y="523" font-size="7">SAN DIEGO</text>
-          <circle cx="165" cy="295" r="1.5" fill="rgba(15,35,80,0.25)"/>
-          <text x="150" y="308" font-size="6.5" opacity="0.8">FRESNO</text>
+        <g font-family="'Sora', system-ui" fill="rgba(15,35,80,0.65)" font-size="8" font-weight="700" letter-spacing="0.07em">
+          <circle cx="112" cy="230" r="2" fill="rgba(15,35,80,0.35)"/>
+          <text x="116" y="234" text-anchor="start">BAY AREA</text>
+
+          <circle cx="115" cy="191" r="2.5" fill="rgba(15,35,80,0.4)"/>
+          <text x="121" y="195" text-anchor="start">SAC</text>
+
+          <circle cx="165" cy="295" r="2" fill="rgba(15,35,80,0.3)"/>
+          <text x="150" y="308" text-anchor="start" font-size="7.5" opacity="0.8">FRESNO</text>
+
+          <circle cx="252" cy="443" r="2.5" fill="rgba(15,35,80,0.4)"/>
+          <text x="256" y="457" text-anchor="start">LOS ANGELES</text>
+
+          <circle cx="308" cy="514" r="2.5" fill="rgba(15,35,80,0.4)"/>
+          <text x="308" y="527" text-anchor="middle">SAN DIEGO</text>
         </g>
 
-        <!-- Markers — representative sample for preview -->
-        <!-- Bay Area cluster -->
-        <circle cx="82" cy="233" r="7" fill="#FFFFFF" stroke="#1E3A6E" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="98" cy="222" r="7" fill="#7aaef0" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3.4s" begin="0.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="110" cy="230" r="7" fill="#f07a6a" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3.2s" begin="1s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="88" cy="246" r="7" fill="#FFFFFF" stroke="#1E3A6E" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="2.8s" begin="0.3s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- Sacramento -->
-        <circle cx="120" cy="189" r="7" fill="#FFFFFF" stroke="#1E3A6E" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3.1s" begin="0.8s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="134" cy="196" r="7" fill="#f07a6a" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="2.9s" begin="1.2s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- Central Coast -->
-        <circle cx="125" cy="345" r="7" fill="#7aaef0" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3.3s" begin="0.6s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- LA -->
-        <circle cx="228" cy="445" r="7" fill="#FFFFFF" stroke="#1E3A6E" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3s" begin="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="215" cy="438" r="7" fill="#7aaef0" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="2.7s" begin="0.9s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- San Diego -->
-        <circle cx="278" cy="508" r="7" fill="#FFFFFF" stroke="#1E3A6E" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3.2s" begin="1.8s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="291" cy="502" r="7" fill="#7aaef0" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="2.8s" begin="2s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- Fresno -->
-        <circle cx="164" cy="293" r="7" fill="#7aaef0" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3.5s" begin="1.3s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- Coachella / Inland -->
-        <circle cx="326" cy="478" r="7" fill="#7aaef0" stroke="#ffffff" stroke-width="2" opacity="0.9">
-          <animate attributeName="r" values="7;9;7" dur="3s" begin="2.2s" repeatCount="indefinite"/>
-        </circle>
-
+        <!-- Marker layers — populated by JS -->
+        <g id="ringsLayer"></g>
+        <g id="dotsLayer"></g>
       </svg>
-
-      <div class="map-cta-overlay">
-        <div class="map-legend">
-          <div class="legend-item">
-            <div class="legend-dot" style="background:#FFFFFF;border:1.5px solid #1E3A6E"></div>
-            Community Land Trust
-          </div>
-          <div class="legend-item">
-            <div class="legend-dot" style="background:#7aaef0"></div>
-            Public &amp; Social Purpose
-          </div>
-          <div class="legend-item">
-            <div class="legend-dot" style="background:#f07a6a"></div>
-            Limited-Equity Co-op
-          </div>
-        </div>
-        <a href="map.html" class="map-explore-btn">Explore the Full Map →</a>
-      </div>
     </div>
   </div>
 </section>
@@ -1159,7 +1572,67 @@ a { color: var(--indigo); }
   </div>
 </section>
 
-<!-- ── RESOURCES ── -->
+<!-- ── STORIES ── -->
+<section class="stories-section" id="stories" aria-labelledby="stories-heading">
+  <div class="stories-inner">
+    <div class="reveal">
+      <p class="section-eyebrow">Stories</p>
+      <h2 class="section-title" id="stories-heading">Social housing in action</h2>
+      <p class="section-body">Real communities building permanently affordable housing across California.</p>
+    </div>
+    <div class="stories-grid">
+      <!-- BUILD:stories:START -->
+      <div class="story-card reveal">
+        <div class="story-media">
+          <iframe
+            src="https://www.youtube.com/embed/VyRHumkv598"
+            title="How San Francisco Neighbors saved 320 14th Street"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy">
+          </iframe>
+        </div>
+        <div class="story-body">
+          <div class="story-org">San Francisco Community Land Trust</div>
+          <div class="story-title">How San Francisco Neighbors saved 320 14th Street</div>
+        </div>
+      </div>
+      <div class="story-card reveal reveal-delay-1">
+        <div class="story-media">
+          <img src="https://raw.githubusercontent.com/adrielhampton/sch-hosted-images/refs/heads/main/IMG_23rdAve.jpg"
+               alt="Liberating 23rd Avenue — Oakland Community Land Trust">
+        </div>
+        <div class="story-body">
+          <div class="story-org">Oakland Community Land Trust</div>
+          <div class="story-title">Liberating 23rd Avenue</div>
+          <p class="story-excerpt">In early 2017, residents and commercial tenants received notice their building was for sale. Connecting with OakCLT, they coalesced around a vision of permanently affordable rents and a pathway toward cooperative self-management and shared ownership.</p>
+          <a class="story-read" href="https://oakclt.org/portfolio-items/liberated23rdave/" target="_blank" rel="noopener">Read More →</a>
+        </div>
+      </div>
+      <!-- BUILD:stories:END -->
+    </div>
+  </div>
+</section>
+
+<!-- ── SIGN UP ── -->
+<section class="signup-section" id="act" aria-labelledby="act-heading">
+  <div class="signup-inner">
+    <div class="reveal">
+      <p class="section-eyebrow">Get Involved</p>
+      <h2 class="section-title" id="act-heading">Join the campaign</h2>
+      <p class="section-body">
+        Add your name and stay informed. We&#x27;ll share updates on social housing legislation, local organizing, and ways to take action across California.
+      </p>
+    </div>
+    <div class="form-placeholder reveal">
+      <!-- form.123formbuilder.com script begins here -->
+      <script type="text/javascript" defer src="https://form.123formbuilder.com/embed/6951025.js" data-role="form" data-default-width="800px" data-custom-vars="hasEmbedFormStyle=1"></script>
+      <!-- form.123formbuilder.com script ends here -->
+    </div>
+  </div>
+</section>
+
+<!-- ── LIBRARY ── -->
 <section class="briefs-section" id="resources" aria-labelledby="resources-heading">
   <div class="briefs-inner">
     <div class="reveal">
@@ -1216,24 +1689,6 @@ a { color: var(--indigo); }
   </div>
 </section>
 
-<!-- ── SIGN UP ── -->
-<section class="signup-section" id="act" aria-labelledby="act-heading">
-  <div class="signup-inner">
-    <div class="reveal">
-      <p class="section-eyebrow">Get Involved</p>
-      <h2 class="section-title" id="act-heading">Join the campaign</h2>
-      <p class="section-body">
-        Add your name and stay informed. We&#x27;ll share updates on social housing legislation, local organizing, and ways to take action across California.
-      </p>
-    </div>
-    <div class="form-placeholder reveal">
-      <!-- form.123formbuilder.com script begins here -->
-      <script type="text/javascript" defer src="https://form.123formbuilder.com/embed/6951025.js" data-role="form" data-default-width="800px" data-custom-vars="hasEmbedFormStyle=1"></script>
-      <!-- form.123formbuilder.com script ends here -->
-    </div>
-  </div>
-</section>
-
 <!-- ── PARTNERS ── -->
 <section class="partners-section" id="partners" aria-labelledby="partners-heading">
   <div class="partners-inner">
@@ -1275,6 +1730,7 @@ a { color: var(--indigo); }
         <li><a href="#what">The Model</a></li>
         <li><a href="#map">The Map</a></li>
         <li><a href="#who">Who It's For</a></li>
+        <li><a href="#stories">Stories</a></li>
         <li><a href="#resources">Resources</a></li>
         <li><a href="#act">Take Action</a></li>
         <li><a href="#partners">Partners</a></li>
@@ -1287,6 +1743,30 @@ a { color: var(--indigo); }
     </div>
   </div>
 </footer>
+
+<!-- ── MAP — DRAWER & MODAL (fixed-position overlays, kept at end of body) ── -->
+<div class="drawer-overlay" id="drawerOverlay" aria-hidden="true"></div>
+
+<div class="drawer" id="drawer" role="dialog" aria-modal="false" aria-label="Location detail">
+  <div class="drawer-top">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <button class="drawer-close" id="drawerClose" aria-label="Close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="drawerContent"></div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Location detail" aria-hidden="true">
+  <div class="modal-img-wrap" id="modalImgWrap">
+    <div id="modalImgPlaceholder" aria-hidden="true"></div>
+    <div class="modal-img-gradient"></div>
+    <button class="modal-close" id="modalClose" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="modal-content" id="modalContent"></div>
+</div>
 
 <script>
 // ── SCROLL REVEAL ──────────────────────────────────────────────────────────
@@ -1305,6 +1785,491 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 document.querySelectorAll('.hero .reveal').forEach(el => {
   setTimeout(() => el.classList.add('visible'), 100);
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── INTERACTIVE MAP ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── TAG CONFIG ────────────────────────────────────────────────────────────
+const TAG = {
+  clt:        { color: '#FFFFFF', stroke: '#1E3A6E', label: 'Community Land Trust' },
+  coop:       { color: '#f07a6a', stroke: '#ffffff', label: 'Limited-Equity Co-op' },
+  nonprofit:  { color: '#7aaef0', stroke: '#ffffff', label: 'Mission-Aligned Nonprofit' },
+  mobilehome: { color: '#52C98A', stroke: '#1a4a30', label: 'Resident-Owned Park' },
+};
+
+// ── LOCATION DATA ─────────────────────────────────────────────────────────
+/* BUILD:map_data:START */
+const LOCATIONS = [
+  {
+    id: "sf-clt",
+    tags: ["clt"],
+    name: "San Francisco Community Land Trust",
+    project: "320 14th St.",
+    city: "San Francisco",
+    region: "Bay Area",
+    lat: 37.766,
+    lng: -122.425,
+    desc: "16 apartments at 320 14th Street in San Francisco's Mission District. One third of the mostly-Latinx households have called this apartment their home for more than 20 years. When building conditions deteriorated and their frustration boiled over into a rent strike, the long-time tenants — including seniors and families — faced serious risk of eviction. After more than two years of organizing, their building was bought by the SFCLT and converted into permanently affordable housing.",
+    youtube: "https://www.youtube.com/watch?v=VyRHumkv598",
+    url: "https://sfclt.org/",
+    urlLabel: "Visit SFCLT"
+  },
+  {
+    id: "oak-clt",
+    tags: ["clt"],
+    name: "Oakland Community Land Trust",
+    project: "Liberated 23rd Avenue",
+    city: "Oakland",
+    region: "Bay Area",
+    lat: 37.797,
+    lng: -122.232,
+    desc: "The 23rd Avenue Community Building in Oakland is a mixed-use cultural hub in the Lower San Antonio neighborhood, home to eight apartments, four nonprofit storefronts, and a community garden. When the property was put up for sale in 2017, residents and tenants partnered with OakCLT to prevent displacement and preserve it as a permanent community asset. Through a collaborative financing strategy and a resident-led campaign, the building was acquired, securing long-term affordability and creating a pathway toward cooperative ownership.",
+    img: "images/IMG_Oakland Community Land Trust.png",
+    url: "https://oakclt.org/portfolio-items/liberated23rdave/",
+    urlLabel: "Read More"
+  },
+  {
+    id: "south-bay-clt",
+    tags: ["clt"],
+    name: "South Bay Community Land Trust",
+    project: "The Virginia Apartments",
+    city: "San Jose",
+    region: "Bay Area",
+    lat: 37.339,
+    lng: -121.831,
+    desc: "The Virginia Avenue Apartments in San Jose's Mayfair neighborhood are home to 18 immigrant, multigenerational families who organized for over three years alongside the South Bay Community Land Trust to prevent displacement and secure community ownership. Following unanimous City Council approval, SBCLT acquired the property in January 2025, permanently removing it from the speculative market and ensuring long-term housing stability for families to remain rooted in their community for generations.",
+    img: "images/IMG_South Bay Community Land Trust.png",
+    url: "https://siliconvalleyathome.org/celebrating-south-bay-community-land-trusts-acquisition-of-virginia-avenue-apartments/",
+    urlLabel: "Read More"
+  },
+  {
+    id: "bakersfield-clt",
+    tags: ["clt"],
+    name: "Bakersfield Community Land Trust",
+    project: "7033 Sunchase Drive",
+    city: "Bakersfield",
+    region: "Central Valley",
+    lat: 35.371,
+    lng: -119.019,
+    desc: "The Bakersfield Community Land Trust, established in 2024, is a city-supported nonprofit advancing affordable homeownership through the community land trust model. In partnership with the City of Bakersfield and Self-Help Enterprises, BCLT is developing new homes for low- and moderate-income first-time buyers, including an initial 14-home project that recently broke ground. By separating ownership of land and housing, the model enables residents to build equity while ensuring long-term affordability.",
+    img: "images/IMG_Bakersfield Community Land Trust.png",
+    url: "https://www.bakersfield.com/news/applications-open-for-first-land-trust-homes/article_fd9ed885-721d-428f-bb7a-4074982aed73.html",
+    urlLabel: "Read More"
+  },
+  {
+    id: "south-tower-clt",
+    tags: ["clt"],
+    name: "South Tower Community Land Trust",
+    project: "517 N. Farris Avenue",
+    city: "Fresno",
+    region: "Central Valley",
+    lat: 36.752,
+    lng: -119.792,
+    desc: "Two single-family homes at 517 and 525 N. Farris St. in Fresno were acquired by the South Tower CLT as part of a place-based strategy to expand permanently affordable homeownership. Designed to serve marginalized residents — including Black, Indigenous, LGBTQ+, disabled, immigrant, and formerly unhoused community members — the CLT targets overlooked, investor-driven properties, rehabilitates them, and resells them at accessible prices for first-time buyers.",
+    url: "https://thebusinessjournal.com/from-vacancy-to-vibrancy-south-tower-clt-leads-revitalization-in-neighborhood-often-overlooked/",
+    urlLabel: "Read More"
+  },
+  {
+    id: "beverly-vermont-clt",
+    tags: ["clt", "coop"],
+    name: "Beverly Vermont Community Land Trust",
+    project: "Tierra Urbana / LA Eco-Village",
+    city: "Los Angeles",
+    region: "Southern California",
+    lat: 34.071,
+    lng: -118.292,
+    desc: "Urban Soil Tierra Urbana in Los Angeles is a resident-led housing cooperative operating on land held by the Beverly Vermont Community Land Trust, combining collective ownership with long-term affordability. Founded in 2010 out of the Los Angeles Eco-Village, the co-op includes over 40 members who share ownership and governance of their homes through a democratic structure. This dual CLT + cooperative model ensures permanent affordability while empowering residents to collectively manage their housing.",
+    url: null,
+    urlLabel: null
+  },
+  {
+    id: "avanzando-sy",
+    tags: ["clt"],
+    name: "Casa Familiar / Avanzando San Ysidro CLT",
+    project: "Avanzado Project",
+    city: "San Ysidro",
+    region: "Southern California",
+    lat: 32.72,
+    lng: -117.057,
+    desc: "Avanzando, developed by Casa Familiar in partnership with Hitzke Development, will deliver 103 new homes — 101 of them affordable — designed to support low-income residents with stable, transit-accessible housing. Located near public transportation, the project expands equitable access to jobs, services, and community resources while advancing long-term affordability in the neighborhood.",
+    url: null,
+    urlLabel: null
+  },
+  {
+    id: "peoples-self-help",
+    tags: ["nonprofit"],
+    name: "People's Self-Help Housing",
+    project: "Rancho Sespe Apartments",
+    city: "Fillmore",
+    region: "Southern California",
+    lat: 34.400,
+    lng: -118.915,
+    desc: "Rancho Sespe Apartments in Fillmore is a 100-unit affordable housing community serving farmworker families, with homes ranging from two to four bedrooms. Managed by People's Self-Help Housing, the development provides stable, family-sized housing for residents whose incomes are rooted in agricultural work in the region.",
+    url: "https://pshhc.org/",
+    urlLabel: "Visit PSHHC"
+  },
+  {
+    id: "nueva-lago",
+    tags: ["mobilehome"],
+    name: "ROC USA California / Nuevo Lago",
+    project: "Nueva Lago Mobile Home Park",
+    city: "Fresno County",
+    region: "Central Valley",
+    lat: 36.653,
+    lng: -119.900,
+    desc: "Nuevo Lago Mobile Home Park in Fresno County is a resident-owned community where predominantly Oaxacan farmworker families organized over five years to purchase their mobile home park from a corporate landlord and prevent displacement. Now structured as a limited-equity housing cooperative, residents collectively own and govern the park, with each household holding a stake and participating in decisions around rents, operations, and community rules.",
+    img: "images/IMG_ROC USA California Network.png",
+    url: "https://www.kqed.org/news/11977464/to-fight-rising-rents-these-fresno-county-residents-bought-their-mobile-home-park",
+    urlLabel: "Read More"
+  }
+];
+/* BUILD:map_data:END */
+
+// ── PROJECTION ────────────────────────────────────────────────────────────
+function project(lng, lat) {
+  const x = (lng + 124.5) * (420 / 11);
+  const y = (42.1 - lat) * (540 / 9.9);
+  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+}
+
+// ── SVG SETUP ─────────────────────────────────────────────────────────────
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const ringsLayer = document.getElementById('ringsLayer');
+const dotsLayer  = document.getElementById('dotsLayer');
+const svgDefs    = document.getElementById('svgDefs');
+
+// ── SPLIT-COLOR GRADIENT FACTORY ──────────────────────────────────────────
+function ensureSplitGradient(tag1, tag2) {
+  const id = `split-${tag1}-${tag2}`;
+  if (!document.getElementById(id)) {
+    const grad = document.createElementNS(SVG_NS, 'linearGradient');
+    grad.setAttribute('id', id);
+    grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+    grad.setAttribute('x2', '1'); grad.setAttribute('y2', '0');
+    const s1 = document.createElementNS(SVG_NS, 'stop');
+    s1.setAttribute('offset', '50%');
+    s1.setAttribute('stop-color', TAG[tag1]?.color || '#ffffff');
+    const s2 = document.createElementNS(SVG_NS, 'stop');
+    s2.setAttribute('offset', '50%');
+    s2.setAttribute('stop-color', TAG[tag2]?.color || '#ffffff');
+    grad.appendChild(s1);
+    grad.appendChild(s2);
+    svgDefs.appendChild(grad);
+  }
+  return id;
+}
+
+// ── DECONFLICT OVERLAPPING MARKERS ────────────────────────────────────────
+(function deconflict() {
+  const THRESHOLD = 20;
+  const SPIRAL_STEP = 15;
+  const MAX_SPIRAL = 8;
+
+  const positions = LOCATIONS.map(loc => {
+    const p = project(loc.lng, loc.lat);
+    return { id: loc.id, x: p.x, y: p.y, ox: p.x, oy: p.y };
+  });
+
+  function dist(a, b) {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+  }
+  function conflicts(pos, all, selfId) {
+    return all.some(p => p.id !== selfId && dist(p, pos) < THRESHOLD);
+  }
+
+  for (let i = 0; i < positions.length; i++) {
+    const p = positions[i];
+    if (!conflicts(p, positions, p.id)) continue;
+    let placed = false;
+    for (let step = 1; step <= MAX_SPIRAL && !placed; step++) {
+      const angle_count = step * 6;
+      for (let a = 0; a < angle_count && !placed; a++) {
+        const angle = (a / angle_count) * 2 * Math.PI;
+        const r = step * SPIRAL_STEP * 0.6;
+        const candidate = { x: p.ox + Math.cos(angle) * r, y: p.oy + Math.sin(angle) * r };
+        if (!conflicts(candidate, positions, p.id)) {
+          p.x = candidate.x; p.y = candidate.y; placed = true;
+        }
+      }
+    }
+  }
+
+  positions.forEach(p => {
+    const loc = LOCATIONS.find(l => l.id === p.id);
+    if (loc) { loc._svgX = p.x; loc._svgY = p.y; }
+  });
+})();
+
+// ── BUILD MARKERS ─────────────────────────────────────────────────────────
+const markerEls = [];
+
+LOCATIONS.forEach((loc, i) => {
+  const raw = project(loc.lng, loc.lat);
+  const x = loc._svgX !== undefined ? loc._svgX : raw.x;
+  const y = loc._svgY !== undefined ? loc._svgY : raw.y;
+
+  // Determine fill — single or split
+  let fillColor, strokeColor;
+  if (loc.tags.length >= 2) {
+    const gradId = ensureSplitGradient(loc.tags[0], loc.tags[1]);
+    fillColor = `url(#${gradId})`;
+    strokeColor = TAG[loc.tags[0]]?.stroke || '#ffffff';
+  } else {
+    const cfg = TAG[loc.tags[0]] || TAG.clt;
+    fillColor = cfg.color;
+    strokeColor = cfg.stroke;
+  }
+
+  const delay = i * 60;
+
+  // Pulse ring
+  const ring = document.createElementNS(SVG_NS, 'circle');
+  ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', '8');
+  ring.setAttribute('fill', 'none');
+  ring.setAttribute('stroke', TAG[loc.tags[0]]?.color || '#fff');
+  ring.setAttribute('stroke-width', '1.5');
+  ring.setAttribute('opacity', '0');
+  const animR = document.createElementNS(SVG_NS, 'animate');
+  animR.setAttribute('attributeName', 'r');
+  animR.setAttribute('from', '8'); animR.setAttribute('to', '22');
+  animR.setAttribute('dur', '2.6s'); animR.setAttribute('begin', `${delay}ms`);
+  animR.setAttribute('repeatCount', 'indefinite');
+  ring.appendChild(animR);
+  const animO = document.createElementNS(SVG_NS, 'animate');
+  animO.setAttribute('attributeName', 'opacity');
+  animO.setAttribute('from', '0.65'); animO.setAttribute('to', '0');
+  animO.setAttribute('dur', '2.6s'); animO.setAttribute('begin', `${delay}ms`);
+  animO.setAttribute('repeatCount', 'indefinite');
+  ring.appendChild(animO);
+  ringsLayer.appendChild(ring);
+
+  // Dot
+  const dot = document.createElementNS(SVG_NS, 'circle');
+  dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', '7');
+  dot.setAttribute('fill', fillColor);
+  dot.setAttribute('stroke', strokeColor);
+  dot.setAttribute('stroke-width', '2');
+  dot.setAttribute('class', 'map-marker-dot');
+  dot.setAttribute('role', 'button');
+  dot.setAttribute('tabindex', '0');
+  dot.setAttribute('aria-label', `${loc.name} — ${loc.city}`);
+  dot.style.filter = `drop-shadow(0 2px 7px ${TAG[loc.tags[0]]?.color || '#fff'}88)`;
+  dot.setAttribute('pointer-events', 'all');
+
+  dot.style.opacity = '0';
+  dot.style.transition = `opacity 0.5s ease ${delay}ms`;
+  setTimeout(() => { dot.style.opacity = '1'; }, 60);
+
+  dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handleMarkerClick(loc, dot); });
+  dotsLayer.appendChild(dot);
+
+  markerEls.push({ loc, ring, dot });
+});
+
+// ── DRAWER / MODAL ────────────────────────────────────────────────────────
+const drawer        = document.getElementById('drawer');
+const overlay       = document.getElementById('drawerOverlay');
+const drawerContent = document.getElementById('drawerContent');
+const modal         = document.getElementById('modal');
+const modalContent  = document.getElementById('modalContent');
+
+function handleMarkerClick(loc, dotEl) {
+  markerEls.forEach(m => {
+    m.dot.setAttribute('r', '7');
+    const c = TAG[m.loc.tags[0]]?.color || '#fff';
+    m.dot.style.filter = `drop-shadow(0 2px 7px ${c}88)`;
+  });
+  dotEl.setAttribute('r', '9');
+  const c = TAG[loc.tags[0]]?.color || '#fff';
+  dotEl.style.filter = `drop-shadow(0 3px 12px ${c}cc)`;
+
+  if (loc.youtube) {
+    openVideoModal(loc);
+  } else {
+    openDrawer(loc);
+  }
+}
+
+function youtubeId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function buildMediaSlot(loc) {
+  if (loc.img) {
+    return `<div class="drawer-media"><img src="${encodeURI(loc.img)}" alt="${loc.name}" loading="lazy"></div>`;
+  }
+
+  const cfg = TAG[loc.tags[0]] || TAG.clt;
+  const isLight = cfg.color === '#FFFFFF';
+  const iconColor = isLight ? '#FFFFFF' : cfg.color;
+  const regionColor = isLight ? 'rgba(255,255,255,0.7)' : cfg.color;
+  const stripeColor = isLight ? 'rgba(255,255,255,0.06)' : `${cfg.color}12`;
+
+  return `
+    <div class="drawer-media ph" style="--ph-stripe:${stripeColor}">
+      <div class="ph-stripes" aria-hidden="true"></div>
+      <svg class="ph-icon" width="40" height="34" viewBox="0 0 52 44" fill="none" aria-hidden="true">
+        <path d="M2 20L10 12L18 20V36H2V20Z" fill="${iconColor}" opacity=".4"/>
+        <rect x="7" y="26" width="6" height="10" fill="${iconColor}" opacity=".3"/>
+        <path d="M14 18L26 8L38 18V38H14V18Z" fill="${iconColor}" opacity=".85" stroke="${iconColor}" stroke-width="1.2" stroke-linejoin="round"/>
+        <rect x="21" y="27" width="10" height="11" fill="var(--indigo-d)" opacity=".5"/>
+        <rect x="34" y="15" width="16" height="23" fill="${iconColor}" opacity=".5"/>
+        <rect x="36" y="18" width="3" height="3" fill="var(--indigo-d)" opacity=".4"/>
+        <rect x="41" y="18" width="3" height="3" fill="var(--indigo-d)" opacity=".4"/>
+        <rect x="36" y="23" width="3" height="3" fill="var(--indigo-d)" opacity=".4"/>
+        <rect x="41" y="23" width="3" height="3" fill="var(--indigo-d)" opacity=".4"/>
+      </svg>
+      <div class="ph-text">
+        <span class="ph-org">${loc.name}</span>
+        <span class="ph-region" style="color:${regionColor}">${loc.region}</span>
+      </div>
+    </div>`;
+}
+
+function buildCardHTML(loc) {
+  const tagBadges = loc.tags.map(t => {
+    const cfg = TAG[t] || {};
+    const isLight = cfg.color === '#FFFFFF';
+    const bg   = isLight ? 'rgba(255,255,255,0.15)' : `${cfg.color}22`;
+    const col  = isLight ? '#1E3A6E' : cfg.color;
+    const bord = isLight ? 'rgba(30,58,110,0.3)' : `${cfg.color}55`;
+    return `<span class="drawer-tag-badge" style="background:${bg};color:${col};border-color:${bord}">
+      <span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:${isLight ? '#1E3A6E' : cfg.color}"></span>
+      ${cfg.label || t}
+    </span>`;
+  }).join('');
+
+  const locationLine = [loc.city, loc.region].filter(Boolean).join(' · ');
+
+  return `
+    ${buildMediaSlot(loc)}
+    <div class="drawer-tags">${tagBadges}</div>
+    <div class="drawer-name">${loc.name}</div>
+    ${loc.project ? `<div class="drawer-project">${loc.project}</div>` : ''}
+    <div class="drawer-location">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      ${locationLine}
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-desc">${loc.desc}</div>
+    ${loc.url ? `<a href="${loc.url}" target="_blank" rel="noopener" class="drawer-link">${loc.urlLabel || 'Learn More'} →</a>` : ''}
+  `;
+}
+
+function openDrawer(loc) {
+  drawerContent.innerHTML = buildCardHTML(loc);
+  drawer.classList.add('open');
+  overlay.classList.add('visible');
+  drawer.setAttribute('aria-hidden', 'false');
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  overlay.classList.remove('visible');
+  drawer.setAttribute('aria-hidden', 'true');
+  resetDots();
+}
+
+function openVideoModal(loc) {
+  const vid = youtubeId(loc.youtube);
+  if (!vid) { openDrawer(loc); return; }
+
+  const imgWrap = document.getElementById('modalImgWrap');
+  imgWrap.innerHTML = `
+    <iframe
+      class="video-iframe"
+      id="ytIframe"
+      src="https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1&color=white"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+      title="${loc.name} — video"
+    ></iframe>
+    <button class="modal-close" id="modalCloseBtn" aria-label="Close video">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>`;
+
+  const tagBadges = loc.tags.map(t => {
+    const cfg = TAG[t] || {};
+    const isLight = cfg.color === '#FFFFFF';
+    const bg   = isLight ? 'rgba(255,255,255,0.15)' : `${cfg.color}22`;
+    const col  = isLight ? '#1E3A6E' : cfg.color;
+    const bord = isLight ? 'rgba(30,58,110,0.3)' : `${cfg.color}55`;
+    return `<span class="drawer-tag-badge" style="background:${bg};color:${col};border-color:${bord}">
+      <span style="width:7px;height:7px;border-radius:50%;display:inline-block;background:${isLight ? '#1E3A6E' : cfg.color}"></span>
+      ${cfg.label || t}
+    </span>`;
+  }).join('');
+
+  modalContent.innerHTML = `
+    <div class="drawer-tags" style="padding-top:1.1rem">${tagBadges}</div>
+    <div class="drawer-name">${loc.name}</div>
+    ${loc.project ? `<div class="drawer-project">${loc.project}</div>` : ''}
+    <div class="drawer-location">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      ${[loc.city, loc.region].filter(Boolean).join(' · ')}
+    </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-desc">${loc.desc}</div>
+    ${loc.url ? `<a href="${loc.url}" target="_blank" rel="noopener" class="drawer-link">${loc.urlLabel || 'Learn More'} →</a>` : ''}
+  `;
+
+  modal.classList.add('open', 'video');
+  modal.setAttribute('aria-hidden', 'false');
+  overlay.classList.add('visible');
+
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+}
+
+function closeModal() {
+  const iframe = document.getElementById('ytIframe');
+  if (iframe) iframe.src = '';
+
+  modal.classList.remove('open', 'video');
+  modal.setAttribute('aria-hidden', 'true');
+  overlay.classList.remove('visible');
+  resetDots();
+}
+
+function resetDots() {
+  markerEls.forEach(m => {
+    m.dot.setAttribute('r', '7');
+    const c = TAG[m.loc.tags[0]]?.color || '#fff';
+    m.dot.style.filter = `drop-shadow(0 2px 7px ${c}88)`;
+  });
+}
+
+// ── DELEGATED CLICK ON SVG ────────────────────────────────────────────────
+document.getElementById('caMap').addEventListener('click', function(e) {
+  const dot = e.target;
+  if (!dot.classList.contains('map-marker-dot')) return;
+  const entry = markerEls.find(m => m.dot === dot);
+  if (entry) handleMarkerClick(entry.loc, dot);
+});
+
+// Close handlers
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+
+overlay.addEventListener('click', () => {
+  if (drawer.classList.contains('open')) closeDrawer();
+  if (modal.classList.contains('open')) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (modal.classList.contains('open')) closeModal();
+    else if (drawer.classList.contains('open')) closeDrawer();
+  }
+});
+
+// Swipe-to-dismiss on mobile drawer
+let touchStartY = 0;
+drawer.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+drawer.addEventListener('touchend', e => {
+  const delta = e.changedTouches[0].clientY - touchStartY;
+  if (delta > 60) closeDrawer();
+}, { passive: true });
 </script>
 
 </body>
