@@ -14,7 +14,11 @@
 <meta property="og:image" content="https://socialhousingca.org/images/og-image.jpg"/>
 <meta name="twitter:card" content="summary_large_image"/>
 
+<!-- Preconnects + LCP preload (hero served same-origin from images/) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+<link rel="preload" as="image" href="images/Housing%20Now%20-%20School%20Day.JPG" fetchpriority="high">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -117,7 +121,7 @@ a { color: var(--indigo); }
 }
 .nav-wordmark .l2 {
   font-size: 0.72rem;
-  color: var(--sky);
+  color: #2E5BAB;
   display: block;
 }
 
@@ -149,6 +153,98 @@ a { color: var(--indigo); }
 }
 .nav-cta:hover { background: var(--marigold-d); }
 
+/* ── HAMBURGER MENU (mobile only, &lt;600px) ───────── */
+.nav-hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 40px; height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.nav-hamburger:hover { background: var(--pearl); }
+.nav-hamburger:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+.nav-hamburger span {
+  display: block;
+  width: 22px; height: 2.5px;
+  background: var(--indigo);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.nav-hamburger[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+.nav-hamburger[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,18,40,0);
+  z-index: 199;
+  pointer-events: none;
+  transition: background 0.25s;
+}
+.mobile-menu-backdrop.open {
+  background: rgba(10,18,40,0.4);
+  pointer-events: auto;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: var(--nav-h, 60px);
+  left: 0; right: 0;
+  background: var(--white);
+  border-bottom: 3px solid var(--marigold);
+  box-shadow: 0 8px 24px rgba(15,30,60,0.12);
+  transform: translateY(-105%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 201;
+  padding: 0.4rem 0 1rem;
+  list-style: none;
+}
+.mobile-menu.open { transform: translateY(0); }
+
+.mobile-menu li { list-style: none; }
+
+.mobile-menu a {
+  display: block;
+  padding: 0.95rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--body-txt);
+  text-decoration: none;
+  border-bottom: 1px solid var(--pearl);
+  transition: background 0.15s, color 0.15s;
+}
+.mobile-menu a:hover,
+.mobile-menu a:focus-visible { background: var(--pearl); color: var(--indigo); }
+.mobile-menu li:last-child a { border-bottom: none; }
+
+.mobile-menu .mobile-cta {
+  margin: 0.85rem 1.25rem 0.25rem;
+  background: var(--marigold);
+  color: var(--indigo);
+  text-align: center;
+  border-radius: var(--radius);
+  border-bottom: none;
+  font-weight: 700;
+}
+.mobile-menu .mobile-cta:hover { background: var(--marigold-d); color: var(--indigo); }
+
 /* ── HERO ─────────────────────────────────────────── */
 .hero {
   position: relative;
@@ -162,7 +258,7 @@ a { color: var(--indigo); }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url('https://raw.githubusercontent.com/adrielhampton/hosted-images/refs/heads/main/Housing%20Now%20-%20School%20Day.JPG');
+  background-image: url('images/Housing%20Now%20-%20School%20Day.JPG');
   background-size: cover;
   background-position: center 40%;
   opacity: 0.35;
@@ -504,14 +600,23 @@ a { color: var(--indigo); }
 }
 
 .map-marker-dot {
-  cursor: pointer;
+  pointer-events: none;
   transition: r 0.15s ease;
 }
-.map-marker-dot:hover { r: 9px; }
 
-/* All SVG elements are pointer-transparent except the dots themselves */
+.map-marker-hit {
+  cursor: pointer;
+  outline: none;
+}
+.map-marker-hit:focus-visible {
+  stroke: var(--marigold);
+  stroke-width: 2;
+  stroke-dasharray: 3 2;
+}
+
+/* All SVG elements are pointer-transparent except the hit halos */
 #caMap * { pointer-events: none; }
-#caMap .map-marker-dot { pointer-events: all; }
+#caMap .map-marker-hit { pointer-events: all; }
 
 /* ── MAP — DRAWER ─────────────────────────────────── */
 .drawer-overlay {
@@ -1068,7 +1173,7 @@ a { color: var(--indigo); }
 }
 .footer-brand .l2 {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.72);
   display: block;
   margin-top: 0.2rem;
 }
@@ -1089,13 +1194,14 @@ a { color: var(--indigo); }
 
 .footer-bottom {
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.7);
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: space-between;
 }
-.footer-bottom a { color: rgba(255,255,255,0.3); text-decoration: none; }
+.footer-bottom a { color: rgba(255,255,255,0.7); text-decoration: none; }
+.footer-bottom a:hover { color: var(--marigold); }
 
 /* ── STORIES ──────────────────────────────────────── */
 .stories-section {
@@ -1204,6 +1310,8 @@ a { color: var(--indigo); }
   :root { --pad: 1.75rem; }
 
   .nav-links { display: flex; }
+  .nav-hamburger { display: none; }
+  .mobile-menu, .mobile-menu-backdrop { display: none; }
 
   .what-intro { grid-template-columns: 1fr 1fr; align-items: center; }
   .what-grid  { grid-template-columns: 1fr 1fr; }
@@ -1320,8 +1428,19 @@ a { color: var(--indigo); }
       <li><a href="#partners">Partners</a></li>
     </ul>
     <a href="#act" class="nav-cta">Take Action</a>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+<ul class="mobile-menu" id="mobileMenu" aria-label="Mobile site sections">
+  <li><a href="#what">The Model</a></li>
+  <li><a href="#map">The Map</a></li>
+  <li><a href="#who">Who It's For</a></li>
+  <li><a href="#partners">Partners</a></li>
+  <li><a href="#act" class="mobile-cta">Take Action</a></li>
+</ul>
 
 <!-- ── HERO ── -->
 <section class="hero" aria-labelledby="hero-heading">
@@ -1521,7 +1640,7 @@ a { color: var(--indigo); }
           <text x="256" y="457" text-anchor="start">LOS ANGELES</text>
 
           <circle cx="308" cy="514" r="2.5" fill="rgba(15,35,80,0.4)"/>
-          <text x="308" y="527" text-anchor="middle">SAN DIEGO</text>
+          <text x="308" y="506" text-anchor="middle">SAN DIEGO</text>
         </g>
 
         <!-- Marker layers — populated by JS -->
@@ -1546,7 +1665,9 @@ a { color: var(--indigo); }
         <div style="margin-top:1.5rem">
           <img src="https://raw.githubusercontent.com/adrielhampton/shc-preview/refs/heads/main/images/IMG_Key_Ceremony.jpg"
                alt="Key ceremony welcoming new residents into permanently affordable social housing"
-               style="width:100%;border-radius:6px;display:block;object-fit:cover;max-height:220px;">
+               width="800" height="500"
+               loading="lazy"
+               style="width:100%;height:auto;border-radius:6px;display:block;object-fit:cover;max-height:220px;">
         </div>
       </div>
       <div class="who-copy reveal reveal-delay-1">
@@ -1700,11 +1821,11 @@ a { color: var(--indigo); }
     <div class="partners-grid reveal">
       <!-- BUILD:partners:START -->
       <a class="partner-cell" href="https://acceaction.org" target="_blank" rel="noopener" title="ACCE">ACCE</a>
-      <div class="partner-cell" title="Housing Now!">Housing Now!</div>
-      <div class="partner-cell" title="CA Green New Deal Coalition">CA Green New Deal Coalition</div>
+      <a class="partner-cell" href="https://www.housingnowca.org/" target="_blank" rel="noopener" title="Housing Now!">Housing Now!</a>
+      <a class="partner-cell" href="https://www.greennewdealca.org/" target="_blank" rel="noopener" title="CA Green New Deal Coalition">CA Green New Deal Coalition</a>
       <div class="partner-cell" title="CA CLT Network">CA CLT Network</div>
-      <div class="partner-cell" title="LiBRE">LiBRE</div>
-      <div class="partner-cell" title="Power California">Power California</div>
+      <a class="partner-cell" href="https://www.wearelbre.org/" target="_blank" rel="noopener" title="LiBRE — Long Beach Residents Empowered">LiBRE</a>
+      <a class="partner-cell" href="https://powercalifornia.org/" target="_blank" rel="noopener" title="Power California">Power California</a>
       <a class="partner-cell" href="https://policylink.org" target="_blank" rel="noopener" title="PolicyLink">PolicyLink</a>
       <a class="partner-cell" href="https://tenantstogether.org" target="_blank" rel="noopener" title="Tenants Together">Tenants Together</a>
       <a class="partner-cell" href="https://publicadvocates.org" target="_blank" rel="noopener" title="Public Advocates">Public Advocates</a>
@@ -1712,7 +1833,7 @@ a { color: var(--indigo); }
       <a class="partner-cell" href="https://sfclt.org" target="_blank" rel="noopener" title="SF Community Land Trust">SF Community Land Trust</a>
       <a class="partner-cell" href="https://theselc.org" target="_blank" rel="noopener" title="Sustainable Economies Law Center">Sustainable Economies Law Center</a>
       <a class="partner-cell" href="https://picocalifornia.org" target="_blank" rel="noopener" title="PICO California">PICO California</a>
-      <div class="partner-cell" title="LA Housing Movement Lab">LA Housing Movement Lab</div>
+      <a class="partner-cell" href="https://la2050.org/organizations/la-housing-movement-lab" target="_blank" rel="noopener" title="LA Housing Movement Lab">LA Housing Movement Lab</a>
       <!-- BUILD:partners:END -->
     </div>
   </div>
@@ -2046,25 +2167,36 @@ LOCATIONS.forEach((loc, i) => {
 
   // Dot
   const dot = document.createElementNS(SVG_NS, 'circle');
-  dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', '7');
+  dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', '9');
   dot.setAttribute('fill', fillColor);
   dot.setAttribute('stroke', strokeColor);
   dot.setAttribute('stroke-width', '2');
   dot.setAttribute('class', 'map-marker-dot');
-  dot.setAttribute('role', 'button');
-  dot.setAttribute('tabindex', '0');
-  dot.setAttribute('aria-label', `${loc.name} — ${loc.city}`);
+  dot.setAttribute('aria-hidden', 'true');
   dot.style.filter = `drop-shadow(0 2px 7px ${TAG[loc.tags[0]]?.color || '#fff'}88)`;
-  dot.setAttribute('pointer-events', 'all');
+  dot.setAttribute('pointer-events', 'none');
 
   dot.style.opacity = '0';
   dot.style.transition = `opacity 0.5s ease ${delay}ms`;
   setTimeout(() => { dot.style.opacity = '1'; }, 60);
 
-  dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handleMarkerClick(loc, dot); });
   dotsLayer.appendChild(dot);
 
-  markerEls.push({ loc, ring, dot });
+  // Invisible hit halo — large tap target for finger-friendly touch
+  const hit = document.createElementNS(SVG_NS, 'circle');
+  hit.setAttribute('cx', x); hit.setAttribute('cy', y); hit.setAttribute('r', '16');
+  hit.setAttribute('fill', 'transparent');
+  hit.setAttribute('class', 'map-marker-hit');
+  hit.setAttribute('role', 'button');
+  hit.setAttribute('tabindex', '0');
+  hit.setAttribute('aria-label', `${loc.name} — ${loc.city}`);
+  hit.setAttribute('pointer-events', 'all');
+  hit.style.cursor = 'pointer';
+  hit.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleMarkerClick(loc, dot); } });
+  hit.addEventListener('click', () => handleMarkerClick(loc, dot));
+  dotsLayer.appendChild(hit);
+
+  markerEls.push({ loc, ring, dot, hit });
 });
 
 // ── DRAWER / MODAL ────────────────────────────────────────────────────────
@@ -2076,13 +2208,13 @@ const modalContent  = document.getElementById('modalContent');
 
 function handleMarkerClick(loc, dotEl) {
   markerEls.forEach(m => {
-    m.dot.setAttribute('r', '7');
+    m.dot.setAttribute('r', '9');
     const c = TAG[m.loc.tags[0]]?.color || '#fff';
     m.dot.style.filter = `drop-shadow(0 2px 7px ${c}88)`;
   });
-  dotEl.setAttribute('r', '9');
+  dotEl.setAttribute('r', '12');
   const c = TAG[loc.tags[0]]?.color || '#fff';
-  dotEl.style.filter = `drop-shadow(0 3px 12px ${c}cc)`;
+  dotEl.style.filter = `drop-shadow(0 3px 14px ${c}cc)`;
 
   if (loc.youtube) {
     openVideoModal(loc);
@@ -2159,6 +2291,13 @@ function buildCardHTML(loc) {
 }
 
 function openDrawer(loc) {
+  // Mutual exclusion — kill any open video modal first
+  if (modal.classList.contains('open')) {
+    const ifr = document.getElementById('ytIframe');
+    if (ifr) ifr.src = '';
+    modal.classList.remove('open', 'video');
+    modal.setAttribute('aria-hidden', 'true');
+  }
   drawerContent.innerHTML = buildCardHTML(loc);
   drawer.classList.add('open');
   overlay.classList.add('visible');
@@ -2175,6 +2314,12 @@ function closeDrawer() {
 function openVideoModal(loc) {
   const vid = youtubeId(loc.youtube);
   if (!vid) { openDrawer(loc); return; }
+
+  // Mutual exclusion — close drawer if open
+  if (drawer.classList.contains('open')) {
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
 
   const imgWrap = document.getElementById('modalImgWrap');
   imgWrap.innerHTML = `
@@ -2234,7 +2379,7 @@ function closeModal() {
 
 function resetDots() {
   markerEls.forEach(m => {
-    m.dot.setAttribute('r', '7');
+    m.dot.setAttribute('r', '9');
     const c = TAG[m.loc.tags[0]]?.color || '#fff';
     m.dot.style.filter = `drop-shadow(0 2px 7px ${c}88)`;
   });
@@ -2242,10 +2387,13 @@ function resetDots() {
 
 // ── DELEGATED CLICK ON SVG ────────────────────────────────────────────────
 document.getElementById('caMap').addEventListener('click', function(e) {
-  const dot = e.target;
-  if (!dot.classList.contains('map-marker-dot')) return;
-  const entry = markerEls.find(m => m.dot === dot);
-  if (entry) handleMarkerClick(entry.loc, dot);
+  const target = e.target;
+  if (!target.classList) return;
+  // Accept either the visible dot (legacy) or the new hit halo
+  const isMarker = target.classList.contains('map-marker-hit') || target.classList.contains('map-marker-dot');
+  if (!isMarker) return;
+  const entry = markerEls.find(m => m.hit === target || m.dot === target);
+  if (entry) handleMarkerClick(entry.loc, entry.dot);
 });
 
 // Close handlers
@@ -2270,6 +2418,74 @@ drawer.addEventListener('touchend', e => {
   const delta = e.changedTouches[0].clientY - touchStartY;
   if (delta > 60) closeDrawer();
 }, { passive: true });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── HAMBURGER MENU ─────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+(function() {
+  const btn = document.getElementById('navHamburger');
+  const menu = document.getElementById('mobileMenu');
+  const backdrop = document.getElementById('mobileMenuBackdrop');
+  if (!btn || !menu || !backdrop) return;
+
+  // Pin --nav-h so the menu top sits flush below the nav
+  function setNavHeight() {
+    const nav = document.querySelector('.site-nav');
+    if (nav) document.documentElement.style.setProperty('--nav-h', `${nav.offsetHeight}px`);
+  }
+  setNavHeight();
+  window.addEventListener('resize', setNavHeight);
+
+  function openMenu() {
+    menu.classList.add('open');
+    backdrop.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+    btn.setAttribute('aria-label', 'Close menu');
+  }
+  function closeMenu() {
+    menu.classList.remove('open');
+    backdrop.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', 'Open menu');
+  }
+  function toggleMenu() {
+    if (menu.classList.contains('open')) closeMenu();
+    else openMenu();
+  }
+
+  btn.addEventListener('click', toggleMenu);
+  backdrop.addEventListener('click', closeMenu);
+  // Close when a link is tapped
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  // Close on Esc
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && menu.classList.contains('open')) closeMenu();
+  });
+  // Close if viewport grows past the breakpoint while open
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 600 && menu.classList.contains('open')) closeMenu();
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── 123FORMBUILDER IFRAME — A11Y TITLE INJECTION ───────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+(function() {
+  const host = document.querySelector('.form-placeholder');
+  if (!host) return;
+  const ensureTitle = () => {
+    host.querySelectorAll('iframe').forEach(ifr => {
+      if (!ifr.getAttribute('title')) {
+        ifr.setAttribute('title', 'Social Housing California — sign-up form');
+      }
+    });
+  };
+  ensureTitle();
+  const obs = new MutationObserver(ensureTitle);
+  obs.observe(host, { childList: true, subtree: true });
+  // Stop observing after 30s — form will have loaded by then
+  setTimeout(() => obs.disconnect(), 30000);
+})();
 </script>
 
 </body>
