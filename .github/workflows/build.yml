@@ -58,7 +58,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html map.html .build-state.json
+          # Stage only files that exist. .build-state.json doesn't exist
+          # before the first successful publish; map.html may not exist if
+          # the repo only has index.html. Either situation is normal.
+          for f in index.html map.html .build-state.json; do
+            if [ -f "$f" ]; then
+              git add "$f"
+            fi
+          done
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
