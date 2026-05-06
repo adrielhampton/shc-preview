@@ -1,0 +1,67 @@
+name: Build site from Google Sheets
+
+on:
+  # Business-hours Pacific schedule. Runs every 30 minutes, ~9am–6pm Pacific
+  # Mon–Fri, year-round. Two cron entries to span the UTC day boundary that
+  # falls in the middle of the Pacific business day.
+  #
+  # Note: GitHub Actions cron is UTC-only. Pacific Time shifts by 1 hour
+  # between PDT (Mar–Nov) and PST (Nov–Mar), so the schedule is intentionally
+  # ~1 hour wider than 9-to-6 to absorb DST without missing publishes near
+  # the edges. Idle cycles cost nothing — the build exits after one HTTP
+  # request when publish_token in the Sheet is unchanged.
+  schedule:
+    - cron: '*/30 16-23 * * 1-5'   # ~9am–3:59pm Pacific, Mon–Fri
+    - cron: '*/30 0-1 * * 2-6'     # ~5pm–6:59pm Pacific, Mon–Fri (UTC has rolled to next day)
+
+  # Manual trigger from the Actions tab — always available, including
+  # nights and weekends. This is how Nathan publishes outside business hours.
+  workflow_dispatch:
+
+  # Rebuild when the build script or workflow itself changes.
+  # Intentionally NOT triggering on index.html / map.html changes: those are
+  # the build's outputs, and triggering on them would loop forever.
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/build.yml'
+
+# One build at a time. New triggers wait, they don't cancel the running build.
+concurrency:
+  group: build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run build
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: python scripts/build.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html map.html .build-state.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Publish from Sheet [skip ci]"
+            git push
+          fi
