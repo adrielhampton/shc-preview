@@ -1116,28 +1116,41 @@ a { color: var(--indigo); }
 .partners-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: var(--pearl);
-  border: 1px solid #DDE1EC;
-  border-radius: 8px;
-  overflow: hidden;
+  gap: 0.6rem;
   margin-top: 2rem;
 }
 
 .partner-cell {
+  position: relative;
   background: var(--white);
-  padding: 1.25rem;
+  padding: 1.1rem 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 70px;
-  font-size: 0.8rem;
+  min-height: 78px;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--meta-txt);
+  color: var(--indigo);
   text-align: center;
-  transition: background 0.15s;
-  line-height: 1.3;
   text-decoration: none;
+  line-height: 1.3;
+  border-radius: 6px;
+  border: 1px solid #DDE1EC;
+  box-shadow: 0 1px 2px rgba(30, 58, 110, 0.04);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  overflow: hidden;
+}
+.partner-cell::after {
+  /* Marigold corner accent — small triangle in the top-right */
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 14px 14px 0;
+  border-color: transparent var(--marigold) transparent transparent;
+  opacity: 0.75;
+  transition: opacity 0.18s ease, border-width 0.18s ease;
 }
 .partner-cell img {
   max-height: 50px;
@@ -1145,7 +1158,19 @@ a { color: var(--indigo); }
   width: auto;
   object-fit: contain;
 }
-.partner-cell:hover { background: var(--sky-light); }
+.partner-cell:hover {
+  transform: translateY(-2px);
+  border-color: var(--marigold);
+  box-shadow: 0 6px 14px rgba(30, 58, 110, 0.10);
+}
+.partner-cell:hover::after {
+  opacity: 1;
+  border-width: 0 18px 18px 0;
+}
+.partners-eyebrow-count {
+  color: var(--marigold-d);
+  font-weight: 700;
+}
 
 /* ── FOOTER ───────────────────────────────────────── */
 .site-footer {
@@ -1395,6 +1420,207 @@ a { color: var(--indigo); }
   .modal.open { transform: translate(-50%, -50%); opacity: 1; pointer-events: auto; }
   .modal-img-wrap { height: 260px; border-radius: 14px 14px 0 0; }
 }
+
+/* ── NAV DROPDOWNS ────────────────────────────────── */
+.nav-links li { position: relative; }
+.nav-links .has-submenu > a::after {
+  content: "▾";
+  font-size: 0.7em;
+  margin-left: 0.3rem;
+  opacity: 0.65;
+  display: inline-block;
+  transition: transform 0.18s ease;
+}
+.nav-links .has-submenu:hover > a::after,
+.nav-links .has-submenu:focus-within > a::after {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+.nav-submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: var(--white);
+  border: 1px solid #DDE1EC;
+  border-top: 3px solid var(--marigold);
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 8px 20px rgba(30, 58, 110, 0.12);
+  list-style: none;
+  padding: 0.35rem 0;
+  margin: 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
+  z-index: 50;
+}
+.nav-links .has-submenu:hover > .nav-submenu,
+.nav-links .has-submenu:focus-within > .nav-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+.nav-submenu li { position: static; }
+.nav-submenu a {
+  display: block;
+  padding: 0.55rem 1rem;
+  font-size: 0.92rem;
+  color: var(--body-txt);
+  text-decoration: none;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.nav-submenu a:hover {
+  background: var(--pearl);
+  color: var(--indigo);
+}
+
+/* Mobile: dropdowns become indented sublists, no hover behavior */
+.mobile-menu .submenu-toggle {
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.4rem;
+  font-size: 0.8em;
+  opacity: 0.7;
+  transition: transform 0.18s ease;
+}
+.mobile-menu .submenu-toggle.open { transform: rotate(180deg); }
+.mobile-menu .submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0 1.5rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.mobile-menu .submenu.open { max-height: 240px; }
+.mobile-menu .submenu li { margin: 0; padding: 0.4rem 0; }
+.mobile-menu .submenu a {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
+}
+
+/* ── STORY FILTER PILLS ──────────────────────────── */
+.story-filters {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin: 1.5rem 0 1.25rem;
+}
+.story-filter {
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  border: 1.5px solid #DDE1EC;
+  background: var(--white);
+  color: var(--meta-txt);
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+  letter-spacing: 0.01em;
+}
+.story-filter:hover { border-color: var(--indigo); color: var(--indigo); }
+.story-filter.active {
+  background: var(--indigo);
+  color: var(--white);
+  border-color: var(--indigo);
+}
+.story-card[data-hidden="true"] { display: none; }
+
+/* ── STORY CATEGORY BADGES ───────────────────────── */
+.story-card { position: relative; }
+.story-badge {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 3;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  color: var(--white);
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+.story-badge-news     { background: var(--sky); }
+.story-badge-story    { background: var(--indigo); }
+.story-badge-campaign { background: var(--marigold-d); color: var(--indigo-x); }
+
+/* ── LANGUAGE TOGGLE (Google Translate trigger) ──── */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.7rem;
+  border-radius: 4px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+  margin-right: 0.5rem;
+}
+.lang-toggle:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.45);
+}
+.lang-toggle .flag-mx {
+  display: inline-flex;
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.lang-toggle .flag-mx span {
+  display: block;
+  width: 6px;
+  height: 100%;
+}
+.lang-toggle .flag-mx .stripe-g { background: #006847; }
+.lang-toggle .flag-mx .stripe-w { background: #FFFFFF; }
+.lang-toggle .flag-mx .stripe-r { background: #CE1126; }
+
+/* Mobile: lang toggle inline in mobile menu */
+@media (max-width: 759px) {
+  .nav-inner > .lang-toggle { display: none; }
+  .mobile-menu .lang-toggle {
+    display: inline-flex;
+    margin: 0.6rem 0;
+    color: var(--white);
+    border-color: rgba(255,255,255,0.35);
+  }
+}
+@media (min-width: 760px) {
+  .mobile-menu .lang-toggle { display: none; }
+}
+
+/* Hide Google Translate's default banner / iframe / dropdown chrome */
+#google_translate_element { display: none !important; }
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget-icon,
+.goog-te-gadget-simple .goog-te-menu-value span { display: none !important; }
+body { top: 0 !important; }                        /* prevent translate-bar shift */
+.goog-te-gadget { font-size: 0 !important; }       /* hide "Powered by" string */
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
 </style>
 </head>
 <body>
@@ -1424,11 +1650,27 @@ a { color: var(--indigo); }
       </div>
     </a>
     <ul class="nav-links" aria-label="Site sections">
-      <li><a href="#what">The Model</a></li>
+      <li class="has-submenu">
+        <a href="#what" aria-haspopup="true">The Model</a>
+        <ul class="nav-submenu" aria-label="The Model submenu">
+          <li><a href="#what">The Model</a></li>
+          <li><a href="#resources">Library</a></li>
+        </ul>
+      </li>
       <li><a href="#map">The Map</a></li>
-      <li><a href="#who">Who It's For</a></li>
+      <li class="has-submenu">
+        <a href="#who" aria-haspopup="true">Who It's For</a>
+        <ul class="nav-submenu" aria-label="Who It's For submenu">
+          <li><a href="#who">Who It's For</a></li>
+          <li><a href="#stories">Stories</a></li>
+        </ul>
+      </li>
       <li><a href="#partners">Partners</a></li>
     </ul>
+    <button class="lang-toggle" id="langToggle" type="button" aria-label="Cambiar idioma a español">
+      <span class="flag-mx" aria-hidden="true"><span class="stripe-g"></span><span class="stripe-w"></span><span class="stripe-r"></span></span>
+      <span class="lang-toggle-label">ESPAÑOL</span>
+    </button>
     <a href="#act" class="nav-cta">Take Action</a>
     <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
       <span></span><span></span><span></span>
@@ -1437,10 +1679,28 @@ a { color: var(--indigo); }
 </nav>
 <div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
 <ul class="mobile-menu" id="mobileMenu" aria-label="Mobile site sections">
-  <li><a href="#what">The Model</a></li>
+  <li>
+    <a href="#what">The Model</a>
+    <button class="submenu-toggle" type="button" data-target="mobile-sub-model" aria-label="Toggle submenu">▾</button>
+    <ul class="submenu" id="mobile-sub-model">
+      <li><a href="#resources">Library</a></li>
+    </ul>
+  </li>
   <li><a href="#map">The Map</a></li>
-  <li><a href="#who">Who It's For</a></li>
+  <li>
+    <a href="#who">Who It's For</a>
+    <button class="submenu-toggle" type="button" data-target="mobile-sub-who" aria-label="Toggle submenu">▾</button>
+    <ul class="submenu" id="mobile-sub-who">
+      <li><a href="#stories">Stories</a></li>
+    </ul>
+  </li>
   <li><a href="#partners">Partners</a></li>
+  <li>
+    <button class="lang-toggle" type="button" aria-label="Cambiar idioma a español" onclick="document.getElementById('langToggle').click()">
+      <span class="flag-mx" aria-hidden="true"><span class="stripe-g"></span><span class="stripe-w"></span><span class="stripe-r"></span></span>
+      <span>ESPAÑOL</span>
+    </button>
+  </li>
   <li><a href="#act" class="mobile-cta">Take Action</a></li>
 </ul>
 
@@ -1701,37 +1961,16 @@ a { color: var(--indigo); }
     <div class="reveal">
       <p class="section-eyebrow">Stories</p>
       <h2 class="section-title" id="stories-heading">Social housing in action</h2>
-      <p class="section-body">Real communities building permanently affordable housing across California.</p>
+      <p class="section-body">News, stories, and campaigns from across the coalition.</p>
+    </div>
+    <div class="story-filters" role="tablist" aria-label="Filter by category">
+      <button class="story-filter active" type="button" data-cat="all" role="tab" aria-selected="true">All</button>
+      <button class="story-filter" type="button" data-cat="news" role="tab" aria-selected="false">News</button>
+      <button class="story-filter" type="button" data-cat="story" role="tab" aria-selected="false">Stories</button>
+      <button class="story-filter" type="button" data-cat="campaign" role="tab" aria-selected="false">Campaigns</button>
     </div>
     <div class="stories-grid">
       <!-- BUILD:stories:START -->
-      <div class="story-card reveal">
-        <div class="story-media">
-          <iframe
-            src="https://www.youtube.com/embed/VyRHumkv598"
-            title="How San Francisco Neighbors saved 320 14th Street"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            loading="lazy">
-          </iframe>
-        </div>
-        <div class="story-body">
-          <div class="story-org">San Francisco Community Land Trust</div>
-          <div class="story-title">How San Francisco Neighbors saved 320 14th Street</div>
-        </div>
-      </div>
-      <div class="story-card reveal reveal-delay-1">
-        <div class="story-media">
-          <img src="https://raw.githubusercontent.com/adrielhampton/sch-hosted-images/refs/heads/main/IMG_23rdAve.jpg"
-               alt="Liberating 23rd Avenue — Oakland Community Land Trust">
-        </div>
-        <div class="story-body">
-          <div class="story-org">Oakland Community Land Trust</div>
-          <div class="story-title">Liberating 23rd Avenue</div>
-          <p class="story-excerpt">In early 2017, residents and commercial tenants received notice their building was for sale. Connecting with OakCLT, they coalesced around a vision of permanently affordable rents and a pathway toward cooperative self-management and shared ownership.</p>
-          <a class="story-read" href="https://oakclt.org/portfolio-items/liberated23rdave/" target="_blank" rel="noopener">Read More →</a>
-        </div>
-      </div>
       <!-- BUILD:stories:END -->
     </div>
   </div>
@@ -1816,7 +2055,7 @@ a { color: var(--indigo); }
 <section class="partners-section" id="partners" aria-labelledby="partners-heading">
   <div class="partners-inner">
     <div class="reveal">
-      <p class="section-eyebrow">Coalition</p>
+      <p class="section-eyebrow">Coalition<span class="partners-eyebrow-count" id="partnerCount"></span></p>
       <h2 class="section-title" id="partners-heading">Partners &amp; supporters</h2>
       <p class="section-body">Social Housing California is built with and for the organizations doing this work on the ground.</p>
     </div>
@@ -2489,6 +2728,135 @@ drawer.addEventListener('touchend', e => {
   setTimeout(() => obs.disconnect(), 30000);
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Mobile menu submenus, story filter pills, partner count, language toggle
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── MOBILE SUBMENU TOGGLES ───────────────────────────────────────────────
+document.querySelectorAll('.mobile-menu .submenu-toggle').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetId = btn.getAttribute('data-target');
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    btn.classList.toggle('open');
+    target.classList.toggle('open');
+  });
+});
+
+// ── STORY FILTER PILLS ───────────────────────────────────────────────────
+(function() {
+  const pills = document.querySelectorAll('.story-filter');
+  if (!pills.length) return;
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const cat = pill.getAttribute('data-cat');
+      pills.forEach(p => {
+        p.classList.toggle('active', p === pill);
+        p.setAttribute('aria-selected', p === pill ? 'true' : 'false');
+      });
+      document.querySelectorAll('.story-card').forEach(card => {
+        const cardCat = card.getAttribute('data-category');
+        const show = (cat === 'all') || (cardCat === cat);
+        card.setAttribute('data-hidden', show ? 'false' : 'true');
+      });
+    });
+  });
+})();
+
+// ── PARTNER COUNT ────────────────────────────────────────────────────────
+(function() {
+  const countEl = document.getElementById('partnerCount');
+  if (!countEl) return;
+  const cells = document.querySelectorAll('.partners-grid .partner-cell');
+  if (cells.length) {
+    countEl.textContent = ' · ' + cells.length + ' organizations';
+  }
+})();
+
+// ── LANGUAGE TOGGLE (Google Translate trigger) ──────────────────────────
+(function() {
+  const btn = document.getElementById('langToggle');
+  if (!btn) return;
+
+  // Track which language we're showing. Stored so the choice survives
+  // page navigation within the site.
+  function getActiveLang() {
+    try { return localStorage.getItem('shc_lang') || 'en'; } catch (e) { return 'en'; }
+  }
+  function setActiveLang(lang) {
+    try { localStorage.setItem('shc_lang', lang); } catch (e) {}
+  }
+
+  // Apply Google Translate's hidden cookie that drives the page translation.
+  // The widget reads "googtrans" cookie on page load to set initial state.
+  function setTranslateCookie(lang) {
+    const value = (lang === 'es') ? '/en/es' : '/en/en';
+    // Cookie must be set on both bare host and dotted host to survive
+    // Google's own cross-domain logic. Path=/ for whole site.
+    const host = window.location.hostname;
+    document.cookie = 'googtrans=' + value + ';path=/';
+    if (host) {
+      document.cookie = 'googtrans=' + value + ';path=/;domain=' + host;
+      document.cookie = 'googtrans=' + value + ';path=/;domain=.' + host;
+    }
+  }
+
+  // Update button label to reflect current state.
+  function syncButtonLabel() {
+    const lang = getActiveLang();
+    const labels = btn.querySelectorAll('.lang-toggle-label, span:not(.flag-mx):not(.stripe-g):not(.stripe-w):not(.stripe-r)');
+    const text = (lang === 'es') ? 'ENGLISH' : 'ESPAÑOL';
+    btn.setAttribute('aria-label', lang === 'es' ? 'Switch to English' : 'Cambiar idioma a español');
+    // Update both nav buttons (desktop has .lang-toggle-label, mobile uses bare span)
+    document.querySelectorAll('.lang-toggle').forEach(b => {
+      const lbl = b.querySelector('.lang-toggle-label, span:nth-of-type(2)');
+      if (lbl) lbl.textContent = text;
+    });
+  }
+
+  // Initial state: if a previous visit set Spanish, restore it.
+  if (getActiveLang() === 'es') {
+    setTranslateCookie('es');
+  }
+  syncButtonLabel();
+
+  btn.addEventListener('click', () => {
+    const next = (getActiveLang() === 'es') ? 'en' : 'es';
+    setActiveLang(next);
+    setTranslateCookie(next);
+    // Reload so Google Translate picks up the new cookie cleanly. This is
+    // simpler and more reliable than poking the widget's internal state,
+    // and matches how most production sites handle this toggle.
+    window.location.reload();
+  });
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Google Translate widget — hidden via CSS, triggered by language toggle
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="google_translate_element"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'es',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     GoatCounter analytics — privacy-respecting, no cookies
+     SETUP: at cutover, replace YOUR_SITE_CODE with the GoatCounter site
+     code Nathan creates at https://www.goatcounter.com/signup
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script data-goatcounter="https://YOUR_SITE_CODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
 </body>
 </html>
