@@ -387,7 +387,22 @@ def render_stories(rows: list[dict]) -> str:
 
 
 def render_map_data(rows: list[dict]) -> str:
-    """Render map locations as a JSON blob assigned to a const."""
+    """Render map locations as a JSON blob assigned to a const.
+
+    The map JS in index.html expects each location to have:
+      tags      array of strings — drives marker color / legend matching
+      img       optional image URL — fills the drawer media slot
+      youtube   optional YouTube URL — opens video modal instead of drawer
+      project   optional subtitle line below the org name
+      urlLabel  optional custom button label (defaults to "Learn More")
+
+    The Sheet's `tags` column is comma-separated (e.g., "clt" or "clt,coop").
+    Empty tags default to ["clt"] (white pin / indigo border) so a marker
+    always renders, even if the row was added without a tag.
+
+    Header keys are lowercased by fetch_tab(), so the Sheet's "urlLabel"
+    column is read as "urllabel" here.
+    """
     active = [r for r in rows if is_active(r)]
     locations = []
     for r in active:
@@ -399,17 +414,27 @@ def render_map_data(rows: list[dict]) -> str:
         if lat == 0 and lng == 0:
             continue
 
+        # Comma-separated tags → array. Default ["clt"] keeps markers visible
+        # even if a row was added without a tag value.
+        tags_raw = (r.get("tags", "") or "").strip()
+        tags = [t.strip().lower() for t in tags_raw.split(",") if t.strip()]
+        if not tags:
+            tags = ["clt"]
+
         locations.append({
-            "id": r.get("id", "").strip(),
-            "type": r.get("type", "").strip().lower(),
-            "name": r.get("name", "").strip(),
-            "city": r.get("city", "").strip(),
-            "region": r.get("region", "").strip(),
-            "lat": lat,
-            "lng": lng,
-            "desc": r.get("desc", "").strip(),
-            "units": r.get("units", "").strip(),
-            "url": r.get("url", "").strip(),
+            "id":       r.get("id", "").strip(),
+            "tags":     tags,
+            "name":     r.get("name", "").strip(),
+            "project":  r.get("project", "").strip(),
+            "city":     r.get("city", "").strip(),
+            "region":   r.get("region", "").strip(),
+            "lat":      lat,
+            "lng":      lng,
+            "desc":     r.get("desc", "").strip(),
+            "youtube":  r.get("youtube", "").strip(),
+            "img":      r.get("img", "").strip(),
+            "url":      r.get("url", "").strip(),
+            "urlLabel": r.get("urllabel", "").strip(),
         })
 
     return "    const LOCATIONS = " + json.dumps(locations, indent=2) + ";"
